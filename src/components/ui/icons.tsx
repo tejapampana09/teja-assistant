@@ -35,6 +35,7 @@ export const Brain = makeIcon(<><path d="M8 6a3 3 0 0 0-3 3v1a3 3 0 0 0 0 6v1a3 
 export const CalendarClock = makeIcon(<><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /><path d="M12 14v3l2 1" /></>);
 export const CalendarDays = CalendarClock;
 export const Check = makeIcon(<><path d="m20 6-11 11-5-5" /></>);
+export const CheckCheck = makeIcon(<><path d="m2 12 5 5L17 7" /><path d="m8 12 5 5L23 7" /></>);
 export const CheckCircle2 = makeIcon(<><circle cx="12" cy="12" r="9" /><path d="m9 12 2 2 4-5" /></>);
 export const CheckSquare = makeIcon(<><rect x="4" y="4" width="16" height="16" rx="2" /><path d="m9 12 2 2 4-5" /></>);
 export const Chrome = makeIcon(<><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="4" /><path d="M21.17 8H12" /><path d="M3.95 6.06 8.54 14" /><path d="M10.88 21.94 15.46 14" /></>);

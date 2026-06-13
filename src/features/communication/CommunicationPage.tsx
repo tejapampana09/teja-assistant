@@ -1,5 +1,5 @@
 import { addDoc, deleteDoc, doc, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
-import { Bot, Inbox, MessageCircle, Pencil, Plus, Send, Trash2, UserRound } from "lucide-react";
+import { Bot, Inbox, MessageCircle, Pencil, Plus, Send, Trash2, UserRound, CheckCheck } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
@@ -136,6 +136,27 @@ export function CommunicationPage() {
     }
   }
 
+  async function removeMessage(messageId: string) {
+    if (!user) return;
+    try {
+      await deleteDoc(doc(userCommunicationMessages(user.uid), messageId));
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function clearAllMessages() {
+    if (!user) return;
+    if (!window.confirm("Are you sure you want to delete all messages in this view?")) return;
+    try {
+      for (const msg of selectedMessages) {
+        await deleteDoc(doc(userCommunicationMessages(user.uid), msg.id));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <section className="space-y-5">
       <div className="glass-panel rounded-[2rem] p-6">
@@ -213,11 +234,19 @@ export function CommunicationPage() {
         <div className="glass-panel rounded-[2rem] p-5">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="font-semibold">Inbox</h2>
-            <span className="text-sm text-slate-500">{selectedMessages.length} messages</span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-500">{selectedMessages.length} messages</span>
+              {selectedMessages.length > 0 && (
+                <button type="button" onClick={clearAllMessages} className="ghost-button h-8 px-3 text-xs text-red-400 hover:bg-red-400/10 hover:text-red-300">
+                  <CheckCheck className="mr-1.5 h-3.5 w-3.5" />
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
           <div className="space-y-4">
             {selectedMessages.length ? (
-              selectedMessages.map((item) => <MessageCard key={item.id} message={item} />)
+              selectedMessages.map((item) => <MessageCard key={item.id} message={item} onRemove={() => removeMessage(item.id)} />)
             ) : (
               <EmptyState icon={Inbox} title="No communication messages yet" text="Use the notification test form or connect the Android notification listener later." />
             )}
@@ -279,10 +308,17 @@ export function CommunicationPage() {
   );
 }
 
-function MessageCard({ message }: { message: CommunicationMessage }) {
+function MessageCard({ message, onRemove }: { message: CommunicationMessage; onRemove: () => void }) {
   return (
-    <article className="rounded-3xl border border-white/10 bg-white/[0.045] p-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+    <article className="group rounded-3xl border border-white/10 bg-white/[0.045] p-5 relative">
+      <button 
+        onClick={onRemove}
+        className="absolute top-4 right-4 p-2 text-slate-500 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+        title="Clear message"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between pr-8">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-semibold">{message.senderName}</span>
@@ -293,12 +329,38 @@ function MessageCard({ message }: { message: CommunicationMessage }) {
           <p className="mt-3 text-xs text-slate-500">{formatDateTime(message.timestamp || message.createdAt)}</p>
         </div>
       </div>
-      {message.suggestions && <SuggestionGrid suggestions={message.suggestions} />}
+      {message.suggestions && <SuggestionGrid suggestions={message.suggestions} originalMessage={message} />}
     </article>
   );
 }
 
-function SuggestionGrid({ suggestions }: { suggestions: ReplySuggestions }) {
+function SuggestionGrid({ suggestions, originalMessage }: { suggestions: ReplySuggestions; originalMessage: CommunicationMessage }) {
+  const { user } = useAuth();
+  const [sending, setSending] = useState<string | null>(null);
+
+  async function handleSendReply(label: string, text: string) {
+    if (!user || !originalMessage.contactId) return;
+    setSending(label);
+    
+    try {
+      await addDoc(userCommunicationMessages(user.uid), {
+        contactId: originalMessage.contactId,
+        senderName: originalMessage.senderName,
+        content: text,
+        channel: originalMessage.channel,
+        source: 'web_app',
+        direction: 'outgoing',
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+      // Clear suggestions or just let the user see it's sent
+      setTimeout(() => setSending(null), 1500);
+    } catch (error) {
+      console.error("Failed to send reply:", error);
+      setSending(null);
+    }
+  }
+
   const items = [
     ["Short", suggestions.short],
     ["Friendly", suggestions.friendly],
@@ -308,12 +370,22 @@ function SuggestionGrid({ suggestions }: { suggestions: ReplySuggestions }) {
   return (
     <div className="mt-5 grid gap-3 md:grid-cols-3">
       {items.map(([label, text]) => (
-        <div key={label} className="rounded-2xl border border-cyan-300/15 bg-cyan-400/10 p-4">
-          <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-cyan-200">
-            <Send className="h-3.5 w-3.5" />
-            {label}
+        <div key={label} className="flex flex-col justify-between rounded-2xl border border-cyan-300/15 bg-cyan-400/10 p-4">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-cyan-200">
+              <Bot className="h-3.5 w-3.5" />
+              {label}
+            </div>
+            <p className="text-sm leading-6 text-slate-200">{text}</p>
           </div>
-          <p className="text-sm leading-6 text-slate-200">{text}</p>
+          <button 
+            onClick={() => handleSendReply(label, text)}
+            disabled={sending === label}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500/20 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-50"
+          >
+            <Send className="h-3.5 w-3.5" />
+            {sending === label ? "Sending..." : "Send Reply"}
+          </button>
         </div>
       ))}
     </div>

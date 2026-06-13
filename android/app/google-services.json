@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "291987997272",
+    "project_id": "notes-app-b23a4",
+    "storage_bucket": "notes-app-b23a4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291987997272:android:4910483150ea4f04bec02d",
+        "android_client_info": {
+          "package_name": "com.tejaassistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "291987997272-ln3lr7opd0l01sfsorrop94r18hhjcom.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwM43edpoyEKtFTkahtxs0bYaC3VKrE4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "291987997272-ln3lr7opd0l01sfsorrop94r18hhjcom.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

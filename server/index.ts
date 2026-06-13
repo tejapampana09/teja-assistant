@@ -1,6 +1,14 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -76,19 +84,86 @@ app.post("/api/chat", async (request, response) => {
 app.post("/api/reply-suggestions", async (request, response) => {
   try {
     const { message, relationship } = request.body as { message?: string; relationship?: string };
+    const suggestions = await generateSuggestionsDirectly(message || "", relationship || "Unknown");
+    return response.json(suggestions);
+  } catch (error) {
+    console.error(error);
+    return response.json(fallbackSuggestions(String(request.body?.message || "")));
+  }
+});
 
-    if (!message?.trim()) {
-      return response.status(400).json({ error: "Missing message" });
-    }
+app.listen(port, () => {
+  console.log(`Teja Assistant API running on http://localhost:${port}`);
+});
 
-    const apiKey = process.env.AI_PROVIDER_API_KEY || process.env.GROQ_API_KEY;
-    const apiUrl = process.env.AI_PROVIDER_URL || "https://api.groq.com/openai/v1/chat/completions";
-    const model = process.env.AI_PROVIDER_MODEL || "llama-3.1-8b-instant";
+// Initialize Firebase Admin SDK
+const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
+if (fs.existsSync(serviceAccountPath)) {
+  try {
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    initializeApp({
+      credential: cert(serviceAccount)
+    });
+    console.log("Firebase Admin Initialized successfully.");
+    startFirebaseListeners();
+  } catch (err) {
+    console.error("Failed to initialize Firebase Admin:", err);
+  }
+} else {
+  console.warn("No serviceAccountKey.json found. Backend Firebase listener will not start.");
+}
 
-    if (!apiKey) {
-      return response.json(fallbackSuggestions(message));
-    }
+function startFirebaseListeners() {
+  const db = getFirestore();
+  
+  db.collectionGroup('communicationMessages')
+    .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        if (change.type === 'added') {
+          const data = change.doc.data();
+          
+          // Only process Android notifications that don't have suggestions yet
+          if (data.source === 'android_notification' && !data.suggestions) {
+            console.log(`[Firebase Listener] New un-processed Android notification: ${change.doc.id}`);
+            
+            let relationship = "Unknown";
+            const userId = change.doc.ref.parent.parent?.id;
+            
+            if (userId && data.contactId) {
+              try {
+                const contactDoc = await db.collection('users').doc(userId).collection('contacts').doc(data.contactId).get();
+                if (contactDoc.exists) {
+                  relationship = contactDoc.data()?.relationship || "Unknown";
+                }
+              } catch (e) {
+                console.error("Error fetching contact relationship:", e);
+              }
+            }
+            
+            const suggestions = await generateSuggestionsDirectly(data.content || "", relationship);
+            
+            try {
+              await change.doc.ref.update({ suggestions });
+              console.log(`[Firebase Listener] Suggestions saved for message: ${change.doc.id}`);
+            } catch (e) {
+              console.error(`[Firebase Listener] Error updating message ${change.doc.id}:`, e);
+            }
+          }
+        }
+      });
+    });
+}
 
+async function generateSuggestionsDirectly(message: string, relationship: string) {
+  if (!message.trim()) return fallbackSuggestions("");
+
+  const apiKey = process.env.AI_PROVIDER_API_KEY || process.env.GROQ_API_KEY;
+  const apiUrl = process.env.AI_PROVIDER_URL || "https://api.groq.com/openai/v1/chat/completions";
+  const model = process.env.AI_PROVIDER_MODEL || "llama-3.1-8b-instant";
+
+  if (!apiKey) return fallbackSuggestions(message);
+
+  try {
     const providerResponse = await fetch(apiUrl, {
       method: "POST",
       headers: {
@@ -103,8 +178,7 @@ app.post("/api/reply-suggestions", async (request, response) => {
         messages: [
           {
             role: "system",
-            content:
-              "Generate WhatsApp reply suggestions as JSON with keys short, friendly, professional. Keep replies natural. Do not auto-send anything."
+            content: "Generate WhatsApp reply suggestions as JSON with keys short, friendly, professional. Keep replies natural. Do not auto-send anything."
           },
           {
             role: "user",
@@ -114,30 +188,22 @@ app.post("/api/reply-suggestions", async (request, response) => {
       })
     });
 
-    if (!providerResponse.ok) {
-      return response.json(fallbackSuggestions(message));
-    }
+    if (!providerResponse.ok) return fallbackSuggestions(message);
 
-    const data = (await providerResponse.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
+    const data = await providerResponse.json() as any;
     const content = data.choices?.[0]?.message?.content || "{}";
-    const parsed = JSON.parse(content) as Partial<ReturnType<typeof fallbackSuggestions>>;
+    const parsed = JSON.parse(content);
 
-    return response.json({
+    return {
       short: parsed.short || fallbackSuggestions(message).short,
       friendly: parsed.friendly || fallbackSuggestions(message).friendly,
       professional: parsed.professional || fallbackSuggestions(message).professional
-    });
+    };
   } catch (error) {
     console.error(error);
-    return response.json(fallbackSuggestions(String(request.body?.message || "")));
+    return fallbackSuggestions(message);
   }
-});
-
-app.listen(port, () => {
-  console.log(`Teja Assistant API running on http://localhost:${port}`);
-});
+}
 
 function fallbackReply(message: string) {
   if (message.includes("task")) {
