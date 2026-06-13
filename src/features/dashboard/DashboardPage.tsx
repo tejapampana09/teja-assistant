@@ -1,5 +1,5 @@
 import { Activity, CheckCircle2, Clock3, FolderKanban, ListChecks, MessageSquare, Send, Sparkles } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { limit, orderBy, query } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { EmptyState } from "../../components/ui/EmptyState";
@@ -8,7 +8,23 @@ import { useAuth } from "../../context/AuthContext";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { userMemories, userMessages, userTasks } from "../../services/paths";
 import type { ChatMessage, Memory, Task } from "../../types/domain";
-import { formatDateTime } from "../../utils/date";
+import { formatDateTime, getGreeting } from "../../utils/date";
+import { checkGoogleConnection } from "../../services/googleAuth";
+import { fetchUpcomingEvents, CalendarEvent } from "../../services/calendar";
+import { fetchRecentEmails, GmailMessage } from "../../services/gmail";
+import { SmartSuggestionsPanel } from "./SmartSuggestionsPanel";
+
+const MailIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+);
+
+const CalendarIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+);
+
+const ExternalLinkIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+);
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -20,8 +36,39 @@ export function DashboardPage() {
   const { data: memories } = useFirestoreCollection<Memory>(memoryQuery);
   const { data: messages } = useFirestoreCollection<ChatMessage>(messageQuery);
 
+  const [googleConnected, setGoogleConnected] = useState<boolean>(false);
+  const [emails, setEmails] = useState<GmailMessage[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loadingGoogle, setLoadingGoogle] = useState<boolean>(false);
+
   const completed = tasks.filter((task) => task.status === "completed").length;
   const activeProjects = memories.filter((memory) => memory.category === "Projects").length;
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadGoogleData = async () => {
+      try {
+        setLoadingGoogle(true);
+        const connected = await checkGoogleConnection(user.uid);
+        setGoogleConnected(connected);
+        if (connected) {
+          const [fetchedEmails, fetchedEvents] = await Promise.all([
+            fetchRecentEmails(user.uid).catch(() => []),
+            fetchUpcomingEvents(user.uid).catch(() => [])
+          ]);
+          setEmails(fetchedEmails);
+          setEvents(fetchedEvents);
+        }
+      } catch (err) {
+        console.error("Error loading Google data on dashboard:", err);
+      } finally {
+        setLoadingGoogle(false);
+      }
+    };
+
+    void loadGoogleData();
+  }, [user]);
 
   return (
     <div className="space-y-6">
@@ -29,7 +76,7 @@ export function DashboardPage() {
         <div className="glass-panel relative overflow-hidden rounded-[2rem] p-6 md:p-8">
           <div className="absolute right-8 top-8 hidden h-28 w-28 rounded-full border border-cyan-200/50 bg-cyan-400/10 shadow-[0_0_70px_rgba(34,211,238,0.7)] animate-float md:block" />
           <p className="text-sm text-cyan-200">Personal command center</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-normal md:text-5xl">Good Morning, Teja</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal md:text-5xl">{getGreeting()}, {user?.displayName?.split(' ')[0] || "Teja"}</h1>
           <p className="mt-4 max-w-2xl text-slate-300">
             Here is your realtime overview for tasks, memories, and AI conversations.
           </p>
@@ -107,6 +154,114 @@ export function DashboardPage() {
             </div>
           ) : (
             <EmptyState icon={Sparkles} title="Your focus queue is clear" text="Add tasks with due dates to plan the day." />
+          )}
+        </div>
+      </section>
+
+      {user && (
+         <section className="mt-4">
+            <SmartSuggestionsPanel userId={user.uid} />
+         </section>
+      )}
+
+      {/* Google Agenda Section */}
+      <section className="grid gap-5 md:grid-cols-2">
+        {/* Google Calendar */}
+        <div className="glass-panel rounded-[2rem] p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-purple-400" />
+              <h2 className="font-semibold">Google Calendar Agenda</h2>
+            </div>
+            {googleConnected && (
+              <span className="text-xs text-slate-400">Next 7 days</span>
+            )}
+          </div>
+
+          {!googleConnected ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <p className="text-sm text-slate-400">Calendar integration is not configured.</p>
+              <Link to="/integrations" className="mt-3 flex items-center gap-1.5 text-xs font-bold text-cyan-200 hover:underline">
+                Connect Google Account <ExternalLinkIcon className="h-3 w-3" />
+              </Link>
+            </div>
+          ) : loadingGoogle ? (
+            <div className="flex justify-center py-8">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-200 border-t-transparent" />
+            </div>
+          ) : events.length > 0 ? (
+            <div className="space-y-3">
+              {events.map((event) => (
+                <div key={event.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-1">
+                  <div className="flex justify-between items-start gap-2">
+                    <p className="text-sm font-medium text-white line-clamp-1">{event.title}</p>
+                    <span className="text-[10px] bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded-full shrink-0">
+                      Event
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    {new Date(event.start).toLocaleString("en-IN", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit"
+                    })}
+                  </p>
+                  {event.location && (
+                    <p className="text-[11px] text-slate-500 truncate">📍 {event.location}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-sm text-slate-500">No upcoming meetings or events found.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Gmail */}
+        <div className="glass-panel rounded-[2rem] p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MailIcon className="h-5 w-5 text-blue-400" />
+              <h2 className="font-semibold">Recent Unread Emails</h2>
+            </div>
+            {googleConnected && (
+              <span className="text-xs text-slate-400">Syncing live</span>
+            )}
+          </div>
+
+          {!googleConnected ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <p className="text-sm text-slate-400">Gmail integration is not configured.</p>
+              <Link to="/integrations" className="mt-3 flex items-center gap-1.5 text-xs font-bold text-cyan-200 hover:underline">
+                Connect Google Account <ExternalLinkIcon className="h-3 w-3" />
+              </Link>
+            </div>
+          ) : loadingGoogle ? (
+            <div className="flex justify-center py-8">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-cyan-200 border-t-transparent" />
+            </div>
+          ) : emails.length > 0 ? (
+            <div className="space-y-3">
+              {emails.map((email) => (
+                <div key={email.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-1">
+                  <div className="flex justify-between items-start gap-2">
+                    <p className="text-xs font-semibold text-cyan-200 truncate">{email.from}</p>
+                    <span className="text-[10px] bg-blue-500/10 text-blue-300 border border-blue-500/20 px-2 py-0.5 rounded-full shrink-0">
+                      Unread
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-white line-clamp-1">{email.subject}</p>
+                  <p className="text-xs text-slate-400 line-clamp-1">{email.snippet}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-sm text-slate-500">Your inbox is clear! No unread emails.</p>
+            </div>
           )}
         </div>
       </section>

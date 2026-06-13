@@ -1,38 +1,44 @@
 package com.tejaassistant
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.tejaassistant.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
-class MainActivity : Activity() {
+class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var statusText: TextView
-    private lateinit var loginButton: Button
 
-    private val RC_SIGN_IN = 9001
-    private val TAG = "MainActivity"
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val RC_SIGN_IN = 9001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        auth = FirebaseAuth.getInstance()
+        auth = Firebase.auth
 
-        // Configure Google Sign In
         val webClientId = resources.getIdentifier("default_web_client_id", "string", packageName)
         val clientIdString = if (webClientId != 0) getString(webClientId) else ""
 
@@ -43,97 +49,91 @@ class MainActivity : Activity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // UI Setup
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(64, 64, 64, 64)
-        }
-
-        val title = TextView(this).apply {
-            text = "Teja Assistant Login"
-            textSize = 24f
-            setPadding(0, 0, 0, 32)
-        }
-
-        loginButton = Button(this).apply {
-            text = "Sign in with Google"
-        }
-
-        val permissionButton = Button(this).apply {
-            text = "Enable Notification Access"
-        }
-
-        statusText = TextView(this).apply {
-            text = "Not logged in"
-            setPadding(0, 32, 0, 0)
-        }
-
-        layout.addView(title)
-        layout.addView(loginButton)
-        layout.addView(permissionButton)
-        layout.addView(statusText)
-
-        setContentView(layout)
-
-        updateUI()
-
-        loginButton.setOnClickListener {
+        binding.btnLogin.setOnClickListener {
             val signInIntent = googleSignInClient.signInIntent
+            @Suppress("DEPRECATION")
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        permissionButton.setOnClickListener {
-            if (!isNotificationServiceEnabled()) {
-                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        binding.btnPermission.setOnClickListener {
+            if (isNotificationServiceEnabled()) {
+                Toast.makeText(this, getString(R.string.permission_granted), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Permission already granted!", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
             }
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateUI()
+    }
+
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)!!
-                Log.d(TAG, "firebaseAuthWithGoogle:" + account.id)
+                Log.d(TAG, "firebaseAuthWithGoogle: ${account.id}")
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
                 Log.w(TAG, "Google sign in failed", e)
-                Toast.makeText(this, "Google Sign-In failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "${getString(R.string.login_failed)}${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-                    updateUI()
-                } else {
-                    Toast.makeText(this, "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                    updateUI()
-                }
+        lifecycleScope.launch {
+            try {
+                auth.signInWithCredential(credential).await()
+                Toast.makeText(this@MainActivity, getString(R.string.login_success), Toast.LENGTH_SHORT).show()
+                updateUI()
+            } catch (e: Exception) {
+                Log.e(TAG, "Authentication failed", e)
+                Toast.makeText(
+                    this@MainActivity,
+                    "${getString(R.string.login_failed)}${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+                updateUI()
             }
+        }
     }
 
     private fun updateUI() {
         val user = auth.currentUser
+        val notificationEnabled = isNotificationServiceEnabled()
+
         if (user != null) {
-            statusText.text = "Logged in as: ${user.email}"
-            loginButton.visibility = android.view.View.GONE
+            binding.tvStatus.text = "${getString(R.string.logged_in_as)}${user.email}"
+            binding.btnLogin.visibility = View.GONE
         } else {
-            statusText.text = "Not logged in"
-            loginButton.visibility = android.view.View.VISIBLE
+            binding.tvStatus.text = getString(R.string.not_logged_in)
+            binding.btnLogin.visibility = View.VISIBLE
+        }
+
+        if (notificationEnabled) {
+            binding.tvNotificationStatus.text = getString(R.string.notification_status_enabled)
+            binding.tvNotificationStatus.setTextColor(0xFF4ADE80.toInt())
+            binding.btnPermission.text = "Notification Access Active"
+        } else {
+            binding.tvNotificationStatus.text = getString(R.string.notification_status_disabled)
+            binding.tvNotificationStatus.setTextColor(0xFFFB923C.toInt())
+            binding.btnPermission.text = getString(R.string.enable_notification_access)
         }
     }
 
     private fun isNotificationServiceEnabled(): Boolean {
-        val packageNames = NotificationManagerCompat.getEnabledListenerPackages(this)
-        return packageNames.contains(packageName)
+        return NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
     }
 }

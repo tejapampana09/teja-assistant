@@ -7,5 +7,9 @@ export const userMemories = (userId: string) => collection(userDoc(userId), "mem
 export const userMessages = (userId: string) => collection(userDoc(userId), "messages");
 export const userContacts = (userId: string) => collection(userDoc(userId), "contacts");
 export const userConversations = (userId: string) => collection(userDoc(userId), "conversations");
-export const userCommunicationMessages = (userId: string) => collection(userDoc(userId), "communicationMessages");
-export const userVoiceSettings = (userId: string) => doc(userDoc(userId), "settings", "voice");
+export const userCommunicationMessages = (userId: string) =>
+  collection(userDoc(userId), "communicationMessages");
+export const userNotifications = (userId: string) =>
+  collection(userDoc(userId), "notifications");
+export const userVoiceSettings = (userId: string) =>
+  doc(userDoc(userId), "settings", "voice");

@@ -5,9 +5,11 @@ import { Waveform } from "../../components/ui/Waveform";
 import { useAuth } from "../../context/AuthContext";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 import { useTextToSpeech } from "../../hooks/useTextToSpeech";
+import { useToast } from "../../context/ToastContext";
 import { requestAssistantReply } from "../../services/ai";
-import { userVoiceSettings, userMessages } from "../../services/paths";
+import { userVoiceSettings, userMessages, userTasks, userMemories } from "../../services/paths";
 import type { ChatMessage, VoiceSettings } from "../../types/domain";
+import { AssistantBrainService } from "../../services/AssistantBrainService";
 
 const defaultSettings: VoiceSettings = {
   enabled: true,
@@ -18,6 +20,7 @@ const defaultSettings: VoiceSettings = {
 
 export function VoicePage() {
   const { user } = useAuth();
+  const { success } = useToast();
   const [settings, setSettings] = useState<VoiceSettings>(defaultSettings);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
@@ -61,16 +64,68 @@ export function VoicePage() {
         createdAt: serverTimestamp()
       });
 
-      const aiReply = await requestAssistantReply([userMessage]);
-      setReply(aiReply);
+      // Integrate brain service context for voice
+      const brain = new AssistantBrainService(user.uid);
+      const ctx = await brain.assembleContext(prompt);
+      let systemPrompt = brain.buildSystemPrompt(ctx);
+
+      // Append instruction for structured Voice commands
+      systemPrompt += `\n\n== VOICE ACTIONS INSTRUCTION ==\n` +
+        `If the user requests to perform a system action (like adding a task or saving a memory/note/preference), you MUST respond in this format:\n` +
+        `[ACTION] {"action": "create_task" | "create_memory", ...details} [REPLY] Your spoken confirmation message.\n` +
+        `If no action is requested, respond normally without [ACTION] or [REPLY] tags.\n\n` +
+        `JSON schemas:\n` +
+        `- Action "create_task": {"action": "create_task", "title": string, "priority": "low"|"medium"|"high", "dueDate": "YYYY-MM-DD"}\n` +
+        `- Action "create_memory": {"action": "create_memory", "content": string, "category": "General"|"Preferences"|"Projects"|"Reference"}\n` +
+        `Keep [ACTION] strictly valid single-line JSON.`;
+
+      const rawReply = await requestAssistantReply([userMessage], systemPrompt);
+      
+      let parsedReply = rawReply;
+      let actionObj: any = null;
+
+      if (rawReply.includes("[ACTION]")) {
+        const actionMatch = rawReply.match(/\[ACTION\]\s*(\{.*?\})\s*\[REPLY\](.*)/s);
+        if (actionMatch) {
+          try {
+            actionObj = JSON.parse(actionMatch[1].trim());
+            parsedReply = actionMatch[2].trim();
+          } catch (e) {
+            console.error("Failed to parse Voice Action JSON:", e);
+          }
+        }
+      }
+
+      // Execute Action locally if detected
+      if (actionObj) {
+        if (actionObj.action === "create_task") {
+          await addDoc(userTasks(user.uid), {
+            title: actionObj.title || "Untitled Task",
+            priority: actionObj.priority || "medium",
+            status: "active",
+            dueDate: actionObj.dueDate || null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        } else if (actionObj.action === "create_memory") {
+          await addDoc(userMemories(user.uid), {
+            content: actionObj.content || "",
+            category: actionObj.category || "General",
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+      }
+
+      setReply(parsedReply);
 
       await addDoc(userMessages(user.uid), {
         role: "assistant",
-        content: aiReply,
+        content: parsedReply,
         createdAt: serverTimestamp()
       });
 
-      tts.speak(aiReply);
+      tts.speak(parsedReply);
       recognition.resetTranscript();
     } catch (error) {
       console.error(error);
@@ -82,6 +137,7 @@ export function VoicePage() {
   async function saveSettings() {
     if (!user) return;
     await setDoc(userVoiceSettings(user.uid), settings, { merge: true });
+    success("Voice settings saved");
   }
 
   return (

@@ -2,7 +2,11 @@ import type { Timestamp } from "firebase/firestore";
 
 export type FirestoreDate = Timestamp | Date | string | null | undefined;
 
+// ─── Task ──────────────────────────────────────────────────────────────────────
+
 export type TaskStatus = "active" | "completed";
+export type TaskPriority = "low" | "medium" | "high";
+export type TaskRecurrence = "none" | "daily" | "weekly" | "monthly";
 
 export type Task = {
   id: string;
@@ -10,25 +14,39 @@ export type Task = {
   notes?: string;
   dueDate?: FirestoreDate;
   status: TaskStatus;
+  priority: TaskPriority;
+  recurrence: TaskRecurrence;
+  progress?: number; // 0–100
+  aiSuggested?: boolean;
+  completedAt?: FirestoreDate;
   createdAt?: FirestoreDate;
   updatedAt?: FirestoreDate;
 };
 
+// ─── Memory ────────────────────────────────────────────────────────────────────
+
 export type MemoryCategory =
+  | "Personal"
+  | "Work"
+  | "Study"
   | "Projects"
-  | "Goals"
-  | "Preferences"
-  | "Learning"
-  | "Personal Notes";
+  | "Contacts"
+  | "Preferences";
+
+export type MemoryImportance = "low" | "medium" | "high";
 
 export type Memory = {
   id: string;
   title: string;
   content: string;
   category: MemoryCategory;
+  importance: MemoryImportance;
+  tags?: string[];
   createdAt?: FirestoreDate;
   updatedAt?: FirestoreDate;
 };
+
+// ─── Chat ──────────────────────────────────────────────────────────────────────
 
 export type ChatRole = "user" | "assistant";
 
@@ -38,6 +56,8 @@ export type ChatMessage = {
   content: string;
   createdAt?: FirestoreDate;
 };
+
+// ─── Communication ─────────────────────────────────────────────────────────────
 
 export type IntegrationKey =
   | "voice"
@@ -79,6 +99,14 @@ export type ReplySuggestions = {
   professional: string;
 };
 
+export type MessageUrgency = "low" | "medium" | "high";
+
+export type MessageAiAnalysis = {
+  sentiment: "positive" | "neutral" | "negative" | "urgent";
+  urgency: MessageUrgency;
+  summary: string;
+};
+
 export type CommunicationConversation = {
   id: string;
   contactId?: string;
@@ -101,9 +129,13 @@ export type CommunicationMessage = {
   content: string;
   timestamp?: FirestoreDate;
   suggestions?: ReplySuggestions;
+  aiAnalysis?: MessageAiAnalysis;
+  priority?: MessageUrgency;
   source: "manual" | "android_notification" | "future_integration";
   createdAt?: FirestoreDate;
 };
+
+// ─── Daily Briefing ────────────────────────────────────────────────────────────
 
 export type DailyBriefing = {
   pendingTasks: number;
@@ -111,4 +143,23 @@ export type DailyBriefing = {
   upcomingDeadline: string;
   studyGoal: string;
   importantMessages: CommunicationMessage[];
+};
+
+// ─── Assistant Brain ───────────────────────────────────────────────────────────
+
+export type AssistantContext = {
+  memories: string;
+  activeTasks: string;
+  recentConversations: string;
+  userProfile: string;
+  currentDateTime: string;
+  unreadEmails?: string;
+  upcomingEvents?: string;
+};
+
+export type SmartSuggestion = {
+  id: string;
+  text: string;
+  action: "chat" | "task" | "memory" | "communication";
+  actionParam?: string;
 };

@@ -3,6 +3,7 @@ import { Bot, Inbox, MessageCircle, Pencil, Plus, Send, Trash2, UserRound, Check
 import { FormEvent, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { upsertIncomingNotification } from "../../services/communication";
 import { userCommunicationMessages, userContacts, userConversations } from "../../services/paths";
@@ -21,6 +22,7 @@ const tones: ContactProfile["preferredTone"][] = ["Short", "Friendly", "Professi
 
 export function CommunicationPage() {
   const { user } = useAuth();
+  const { success, error: toastError } = useToast();
   const [senderName, setSenderName] = useState("");
   const [message, setMessage] = useState("");
   const [creatingNotification, setCreatingNotification] = useState(false);
@@ -69,8 +71,10 @@ export function CommunicationPage() {
       });
       setSenderName("");
       setMessage("");
+      success("Notification sent");
     } catch (error) {
       console.error(error);
+      toastError("Failed to send notification");
     } finally {
       setCreatingNotification(false);
     }
@@ -100,8 +104,10 @@ export function CommunicationPage() {
       }
 
       resetContactForm();
+      success("Contact saved");
     } catch (error) {
       console.error(error);
+      toastError("Failed to save contact");
     }
   }
 
@@ -129,10 +135,13 @@ export function CommunicationPage() {
 
   async function removeContact(contactId: string) {
     if (!user) return;
+    if (!window.confirm("Delete this contact?")) return;
     try {
       await deleteDoc(doc(userContacts(user.uid), contactId));
+      success("Contact deleted");
     } catch (error) {
       console.error(error);
+      toastError("Failed to delete contact");
     }
   }
 
@@ -152,8 +161,10 @@ export function CommunicationPage() {
       for (const msg of selectedMessages) {
         await deleteDoc(doc(userCommunicationMessages(user.uid), msg.id));
       }
+      success("All messages cleared");
     } catch (error) {
       console.error(error);
+      toastError("Failed to clear messages");
     }
   }
 

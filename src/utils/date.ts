@@ -30,3 +30,32 @@ export function formatDateTime(value: FirestoreDate) {
     minute: "2-digit"
   }).format(date);
 }
+
+export function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
+}
+
+export function getRelativeTime(value: FirestoreDate): string {
+  const date = toDate(value);
+  if (!date || Number.isNaN(date.getTime())) return "Just now";
+
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays === 1) return "Yesterday";
+  if (diffInDays < 7) return `${diffInDays}d ago`;
+  
+  return formatDate(date);
+}

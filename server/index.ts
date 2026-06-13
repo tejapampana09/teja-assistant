@@ -1,11 +1,13 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import googleRouter from "./routes/google.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,8 +17,20 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT || 8787);
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 150,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests from this IP, please try again later" }
+});
+
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.use(limiter);
+
+// Register Google routes
+app.use("/api/google", googleRouter);
 
 app.get("/api/health", (_request, response) => {
   response.json({ ok: true, service: "teja-assistant-api" });
@@ -89,6 +103,54 @@ app.post("/api/reply-suggestions", async (request, response) => {
   } catch (error) {
     console.error(error);
     return response.json(fallbackSuggestions(String(request.body?.message || "")));
+  }
+});
+
+app.post("/api/suggest-tasks", async (request, response) => {
+  try {
+    const { conversation } = request.body as { conversation?: string };
+    if (!conversation) return response.json({ tasks: [] });
+
+    const apiKey = process.env.AI_PROVIDER_API_KEY || process.env.GROQ_API_KEY;
+    const apiUrl = process.env.AI_PROVIDER_URL || "https://api.groq.com/openai/v1/chat/completions";
+    const model = process.env.AI_PROVIDER_MODEL || "llama-3.1-8b-instant";
+
+    if (!apiKey) return response.json({ tasks: [] });
+
+    const providerResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.1,
+        max_tokens: 300,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: "Extract actionable tasks from the conversation. Return JSON with a 'tasks' array. Each task must have 'title' (string), 'notes' (string), 'priority' (low/medium/high)."
+          },
+          {
+            role: "user",
+            content: conversation
+          }
+        ]
+      })
+    });
+
+    if (!providerResponse.ok) return response.json({ tasks: [] });
+
+    const data = await providerResponse.json() as any;
+    const content = data.choices?.[0]?.message?.content || "{}";
+    const parsed = JSON.parse(content);
+    
+    return response.json({ tasks: parsed.tasks || [] });
+  } catch (error) {
+    console.error("Task suggestion error:", error);
+    return response.json({ tasks: [] });
   }
 });
 
@@ -246,3 +308,12 @@ function fallbackSuggestions(message: string) {
     professional: "Thank you for your message. I will respond shortly."
   };
 }
+
+// Global error handler middleware
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error("Global Error Handler Caught:", err);
+  res.status(err.status || 500).json({
+    error: err.message || "An unexpected error occurred on the server."
+  });
+});
+

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#05070C"
+    android:padding="24dp">
+
+    <!-- Logo/Title Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="64dp"
+        android:layout_marginBottom="48dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvAppTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Teja Assistant"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#22D3EE"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Personal AI"
+            android:textSize="14sp"
+            android:textColor="#94A3B8"
+            android:layout_marginTop="8dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Status Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:cardBackgroundColor="#0F172A"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Account Status"
+                android:textSize="12sp"
+                android:textColor="#64748B"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Not signed in"
+                android:textSize="16sp"
+                android:textColor="#F8FAFC"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/tvNotificationStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚠ Notification access required"
+                android:textSize="13sp"
+                android:textColor="#FB923C"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Sign In Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Sign in with Google"
+        android:textSize="16sp"
+        android:textColor="#0F172A"
+        android:layout_marginBottom="12dp"
+        app:backgroundTint="#22D3EE"
+        app:cornerRadius="16dp"
+        app:icon="@android:drawable/ic_menu_myplaces"
+        app:iconGravity="textStart"
+        app:iconTint="#0F172A" />
+
+    <!-- Notification Permission Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPermission"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Enable Notification Access"
+        android:textSize="16sp"
+        android:textColor="#E2E8F0"
+        app:backgroundTint="#1E293B"
+        app:cornerRadius="16dp"
+        app:strokeColor="#334155"
+        app:strokeWidth="1dp" />
+
+</LinearLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Teja Assistant</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="enable_notification_access">Enable Notification Access</string>
+    <string name="permission_granted">Notification access already granted!</string>
+    <string name="login_success">Signed in successfully!</string>
+    <string name="login_failed">Sign-in failed: </string>
+    <string name="not_logged_in">Not signed in</string>
+    <string name="logged_in_as">Signed in as: </string>
+    <string name="notification_status_enabled">✓ Notification access enabled</string>
+    <string name="notification_status_disabled">⚠ Notification access required</string>
+</resources>

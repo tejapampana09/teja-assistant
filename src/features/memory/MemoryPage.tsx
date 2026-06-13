@@ -3,18 +3,22 @@ import { Brain, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { userMemories } from "../../services/paths";
-import type { Memory, MemoryCategory } from "../../types/domain";
+import type { Memory, MemoryCategory, MemoryImportance } from "../../types/domain";
 import { formatDateTime } from "../../utils/date";
 
-const categories: MemoryCategory[] = ["Projects", "Goals", "Preferences", "Learning", "Personal Notes"];
+const categories: MemoryCategory[] = ["Personal", "Work", "Study", "Projects", "Contacts", "Preferences"];
 
 export function MemoryPage() {
   const { user } = useAuth();
+  const { success, error } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState<MemoryCategory>("Projects");
+  const [category, setCategory] = useState<MemoryCategory>("Personal");
+  const [importance, setImportance] = useState<MemoryImportance>("medium");
+  const [tagsInput, setTagsInput] = useState("");
   const [search, setSearch] = useState("");
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
 
@@ -33,23 +37,32 @@ export function MemoryPage() {
     event.preventDefault();
     if (!user || !title.trim() || !content.trim()) return;
 
+    const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
+
     const payload = {
       title: title.trim(),
       content: content.trim(),
       category,
+      importance,
+      tags,
       updatedAt: serverTimestamp()
     };
 
-    if (editingMemory) {
-      await updateDoc(doc(userMemories(user.uid), editingMemory.id), payload);
-    } else {
-      await addDoc(userMemories(user.uid), {
-        ...payload,
-        createdAt: serverTimestamp()
-      });
+    try {
+      if (editingMemory) {
+        await updateDoc(doc(userMemories(user.uid), editingMemory.id), payload);
+        success("Memory updated");
+      } else {
+        await addDoc(userMemories(user.uid), {
+          ...payload,
+          createdAt: serverTimestamp()
+        });
+        success("Memory saved");
+      }
+      resetForm();
+    } catch (err) {
+      error("Failed to save memory");
     }
-
-    resetForm();
   }
 
   function editMemory(memory: Memory) {
@@ -57,18 +70,28 @@ export function MemoryPage() {
     setTitle(memory.title);
     setContent(memory.content);
     setCategory(memory.category);
+    setImportance(memory.importance || "medium");
+    setTagsInput((memory.tags || []).join(', '));
   }
 
   function resetForm() {
     setEditingMemory(null);
     setTitle("");
     setContent("");
-    setCategory("Projects");
+    setCategory("Personal");
+    setImportance("medium");
+    setTagsInput("");
   }
 
   async function removeMemory(memoryId: string) {
     if (!user) return;
-    await deleteDoc(doc(userMemories(user.uid), memoryId));
+    if (!window.confirm("Delete this memory?")) return;
+    try {
+      await deleteDoc(doc(userMemories(user.uid), memoryId));
+      success("Memory deleted");
+    } catch (err) {
+      error("Failed to delete memory");
+    }
   }
 
   return (
@@ -78,13 +101,21 @@ export function MemoryPage() {
         <h1 className="mt-2 text-2xl font-semibold">{editingMemory ? "Edit memory" : "Create memory"}</h1>
         <div className="mt-6 space-y-4">
           <input className="field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Memory title" />
-          <select className="field" value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
-            {categories.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+          <div className="grid grid-cols-2 gap-3">
+             <select className="field" value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
+               {categories.map((item) => (
+                 <option key={item} value={item}>
+                   {item}
+                 </option>
+               ))}
+             </select>
+             <select className="field" value={importance} onChange={(e) => setImportance(e.target.value as MemoryImportance)}>
+                <option value="low">Low Importance</option>
+                <option value="medium">Medium Importance</option>
+                <option value="high">High Importance</option>
+             </select>
+          </div>
+          <input className="field" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="Tags (comma separated)" />
           <textarea
             className="field min-h-36 resize-none"
             value={content}
@@ -128,11 +159,25 @@ export function MemoryPage() {
               <article key={memory.id} className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100">
-                      {memory.category}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                       <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100">
+                         {memory.category}
+                       </span>
+                       <span className={`rounded-full border px-3 py-1 text-xs ${memory.importance === 'high' ? 'bg-rose-500/10 text-rose-300 border-rose-500/20' : memory.importance === 'low' ? 'bg-slate-500/10 text-slate-300 border-slate-500/20' : 'bg-violet-500/10 text-violet-300 border-violet-500/20'}`}>
+                         {memory.importance || 'medium'}
+                       </span>
+                    </div>
                     <h3 className="mt-4 text-lg font-semibold">{memory.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-400">{memory.content}</p>
+                    
+                    {memory.tags && memory.tags.length > 0 && (
+                       <div className="mt-4 flex flex-wrap gap-2">
+                          {memory.tags.map(tag => (
+                             <span key={tag} className="text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded uppercase border border-white/10">#{tag}</span>
+                          ))}
+                       </div>
+                    )}
+                    
                     <p className="mt-4 text-xs text-slate-500">{formatDateTime(memory.updatedAt || memory.createdAt)}</p>
                   </div>
                   <div className="flex shrink-0 gap-2">

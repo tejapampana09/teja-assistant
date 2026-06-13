@@ -3,9 +3,10 @@ import { CalendarDays, Check, Pencil, Plus, Trash2 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { userTasks } from "../../services/paths";
-import type { Task } from "../../types/domain";
+import type { Task, TaskPriority, TaskRecurrence } from "../../types/domain";
 import { formatDate } from "../../utils/date";
 
 type TaskFilter = "all" | "active" | "completed";
@@ -14,9 +15,13 @@ const filters: TaskFilter[] = ["all", "active", "completed"];
 
 export function TasksPage() {
   const { user } = useAuth();
+  const { success, error } = useToast();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState<TaskPriority>("medium");
+  const [recurrence, setRecurrence] = useState<TaskRecurrence>("none");
+  const [progress, setProgress] = useState(0);
   const [filter, setFilter] = useState<TaskFilter>("all");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -39,20 +44,28 @@ export function TasksPage() {
       title: title.trim(),
       notes: notes.trim(),
       dueDate: dueDate || null,
+      priority,
+      recurrence,
+      progress,
       updatedAt: serverTimestamp()
     };
 
-    if (editingTask) {
-      await updateDoc(doc(userTasks(user.uid), editingTask.id), payload);
-    } else {
-      await addDoc(userTasks(user.uid), {
-        ...payload,
-        status: "active",
-        createdAt: serverTimestamp()
-      });
+    try {
+      if (editingTask) {
+        await updateDoc(doc(userTasks(user.uid), editingTask.id), payload);
+        success("Task updated");
+      } else {
+        await addDoc(userTasks(user.uid), {
+          ...payload,
+          status: "active",
+          createdAt: serverTimestamp()
+        });
+        success("Task created");
+      }
+      resetForm();
+    } catch (err) {
+      error("Failed to save task");
     }
-
-    resetForm();
   }
 
   function editTask(task: Task) {
@@ -60,6 +73,9 @@ export function TasksPage() {
     setTitle(task.title);
     setNotes(task.notes || "");
     setDueDate(typeof task.dueDate === "string" ? task.dueDate : "");
+    setPriority(task.priority || "medium");
+    setRecurrence(task.recurrence || "none");
+    setProgress(task.progress || 0);
   }
 
   function resetForm() {
@@ -67,20 +83,32 @@ export function TasksPage() {
     setTitle("");
     setNotes("");
     setDueDate("");
+    setPriority("medium");
+    setRecurrence("none");
+    setProgress(0);
   }
 
   async function toggleTask(task: Task) {
     if (!user) return;
-
-    await updateDoc(doc(userTasks(user.uid), task.id), {
-      status: task.status === "completed" ? "active" : "completed",
-      updatedAt: serverTimestamp()
-    });
+    try {
+      await updateDoc(doc(userTasks(user.uid), task.id), {
+        status: task.status === "completed" ? "active" : "completed",
+        updatedAt: serverTimestamp()
+      });
+    } catch (err) {
+      error("Failed to update status");
+    }
   }
 
   async function removeTask(taskId: string) {
     if (!user) return;
-    await deleteDoc(doc(userTasks(user.uid), taskId));
+    if (!window.confirm("Delete this task?")) return;
+    try {
+      await deleteDoc(doc(userTasks(user.uid), taskId));
+      success("Task deleted");
+    } catch (err) {
+      error("Failed to delete task");
+    }
   }
 
   return (
@@ -90,6 +118,28 @@ export function TasksPage() {
         <h1 className="mt-2 text-2xl font-semibold">{editingTask ? "Edit task" : "Create task"}</h1>
         <div className="mt-6 space-y-4">
           <input className="field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Task title" />
+          <div className="grid grid-cols-2 gap-3">
+             <select className="field" value={priority} onChange={(e) => setPriority(e.target.value as TaskPriority)}>
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+             </select>
+             <select className="field" value={recurrence} onChange={(e) => setRecurrence(e.target.value as TaskRecurrence)}>
+                <option value="none">Does not repeat</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+             </select>
+          </div>
+          {editingTask && (
+             <div>
+                <div className="flex justify-between text-xs text-slate-400 mb-2">
+                   <span>Progress</span>
+                   <span>{progress}%</span>
+                </div>
+                <input type="range" className="w-full accent-cyan-400" min="0" max="100" value={progress} onChange={(e) => setProgress(Number(e.target.value))} />
+             </div>
+          )}
           <textarea
             className="field min-h-28 resize-none"
             value={notes}
@@ -151,13 +201,23 @@ export function TasksPage() {
                     {task.status === "completed" && <Check className="h-4 w-4" />}
                   </button>
                   <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                       <span className={`rounded px-1.5 py-0.5 text-[10px] uppercase font-bold border ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-300 border-rose-500/20' : task.priority === 'low' ? 'bg-slate-500/10 text-slate-300 border-slate-500/20' : 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20'}`}>
+                          {task.priority || 'medium'}
+                       </span>
+                       {task.recurrence && task.recurrence !== 'none' && (
+                          <span className="rounded px-1.5 py-0.5 text-[10px] uppercase bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                             {task.recurrence}
+                          </span>
+                       )}
+                    </div>
                     <h3 className={`font-semibold ${task.status === "completed" ? "text-slate-500 line-through" : "text-white"}`}>
                       {task.title}
                     </h3>
                     {task.notes && <p className="mt-1 text-sm leading-6 text-slate-400">{task.notes}</p>}
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      {formatDate(task.dueDate)}
+                    <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+                      <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5" />{formatDate(task.dueDate)}</span>
+                      {(task.progress || 0) > 0 && <span className="text-cyan-200 bg-cyan-400/10 px-2 py-0.5 rounded-full">{task.progress}% done</span>}
                     </div>
                   </div>
                   <div className="flex gap-2">

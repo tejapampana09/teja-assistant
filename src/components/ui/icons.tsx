@@ -56,6 +56,7 @@ export const MicOff = makeIcon(<><path d="m2 2 20 20" /><path d="M9 9v3a3 3 0 0 
 export const Pause = makeIcon(<><path d="M8 5v14" /><path d="M16 5v14" /></>);
 export const Pencil = makeIcon(<><path d="M17 3a2.8 2.8 0 0 1 4 4L8 20l-5 1 1-5Z" /></>);
 export const Play = makeIcon(<><path d="m8 5 12 7-12 7Z" /></>);
+export const RefreshCw = makeIcon(<><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></>);
 export const Plus = makeIcon(<><path d="M12 5v14" /><path d="M5 12h14" /></>);
 export const Save = makeIcon(<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" /><path d="M17 21v-8H7v8" /><path d="M7 3v5h8" /></>);
 export const Search = makeIcon(<><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></>);

@@ -3,6 +3,7 @@ import { Bot, Loader2, Send, Sparkles, User } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { requestAssistantReply } from "../../services/ai";
 import { userMessages } from "../../services/paths";
@@ -16,6 +17,7 @@ const starterPrompts = [
 
 export function ChatPage() {
   const { user } = useAuth();
+  const { error: toastError } = useToast();
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -61,6 +63,8 @@ export function ChatPage() {
         createdAt: serverTimestamp()
       });
     } catch (error) {
+      console.error(error);
+      toastError("Failed to get assistant reply");
       await addDoc(userMessages(user.uid), {
         role: "assistant",
         content:

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.TejaAssistant" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">#22D3EE</item>
+        <item name="colorPrimaryVariant">#0891B2</item>
+        <item name="colorOnPrimary">#0F172A</item>
+        <item name="colorSecondary">#818CF8</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:statusBarColor">#05070C</item>
+        <item name="android:windowBackground">#05070C</item>
+        <item name="android:navigationBarColor">#07101D</item>
+    </style>
+
+    <style name="Theme.TejaAssistant.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>

@@ -8,7 +8,7 @@ import { latestCommunicationMessagesQuery } from "../../services/communication";
 import { buildDailyBriefing } from "../../services/dailyBriefing";
 import { userTasks } from "../../services/paths";
 import type { CommunicationMessage, Task } from "../../types/domain";
-import { formatDateTime } from "../../utils/date";
+import { formatDateTime, getGreeting } from "../../utils/date";
 
 export function BriefingPage() {
   const { user } = useAuth();
@@ -24,7 +24,7 @@ export function BriefingPage() {
       <div className="glass-panel relative overflow-hidden rounded-[2rem] p-6 md:p-8">
         <div className="absolute right-8 top-8 hidden h-28 w-28 rounded-full border border-yellow-200/40 bg-yellow-300/10 shadow-[0_0_70px_rgba(250,204,21,0.35)] md:block" />
         <p className="text-sm text-cyan-200">Daily Briefing</p>
-        <h1 className="mt-3 text-3xl font-semibold md:text-5xl">Good Morning Teja.</h1>
+        <h1 className="mt-3 text-3xl font-semibold md:text-5xl">{getGreeting()} {user?.displayName?.split(' ')[0] || "Teja"}.</h1>
         <p className="mt-4 max-w-2xl text-slate-300">
           Here is the morning snapshot from your tasks, communication hub, deadlines, and study goals.
         </p>
@@ -65,7 +65,7 @@ export function BriefingPage() {
             <h2 className="font-semibold text-white">Generated Brief</h2>
           </div>
           <div className="mt-5 rounded-3xl border border-cyan-300/15 bg-cyan-400/10 p-5 text-sm leading-7 text-slate-200">
-            Good Morning Teja.
+            {getGreeting()} {user?.displayName?.split(' ')[0] || "Teja"}.
             <br />
             Today's Tasks: {briefing.pendingTasks}
             <br />
