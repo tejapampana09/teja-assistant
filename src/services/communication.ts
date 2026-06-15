@@ -9,6 +9,7 @@ export async function upsertIncomingNotification(params: {
   content: string;
   timestamp?: string;
   suggestions?: ReplySuggestions;
+  aiSummary?: string;
 }) {
   const contactId = await ensureContact(params.userId, params.senderName, params.channel);
   const conversationId = await ensureConversation({
@@ -19,15 +20,24 @@ export async function upsertIncomingNotification(params: {
     lastMessage: params.content
   });
 
+  const replySuggestions = params.suggestions 
+    ? [params.suggestions.short, params.suggestions.friendly, params.suggestions.professional] 
+    : [];
+
   await addDoc(userCommunicationMessages(params.userId), {
     conversationId,
     contactId,
     channel: params.channel,
     direction: "incoming",
     senderName: params.senderName,
+    sender: params.senderName,
     content: params.content,
     timestamp: params.timestamp || new Date().toISOString(),
+    unread: true,
+    archived: false,
+    aiSummary: params.aiSummary || "",
     suggestions: params.suggestions,
+    replySuggestions,
     source: params.channel === "whatsapp" ? "android_notification" : "manual",
     createdAt: serverTimestamp()
   });
@@ -36,6 +46,20 @@ export async function upsertIncomingNotification(params: {
     lastMessage: params.content,
     lastMessageAt: params.timestamp || new Date().toISOString(),
     unreadCount: 1,
+    updatedAt: serverTimestamp()
+  });
+}
+
+export async function markMessageReadStatus(userId: string, messageId: string, unread: boolean) {
+  await updateDoc(doc(userCommunicationMessages(userId), messageId), {
+    unread,
+    updatedAt: serverTimestamp()
+  });
+}
+
+export async function archiveMessage(userId: string, messageId: string, archived: boolean) {
+  await updateDoc(doc(userCommunicationMessages(userId), messageId), {
+    archived,
     updatedAt: serverTimestamp()
   });
 }

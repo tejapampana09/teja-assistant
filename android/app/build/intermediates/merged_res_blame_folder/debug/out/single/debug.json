@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "com.tejaassistant.app-merged_res-39:/layout_activity_main.xml.flat",
+        "source": "com.tejaassistant.app-main-41:/layout/activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\ss\\.gradle\\daemon\\8.13\\com.tejaassistant.app-merged_res-39:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\ss\\.gradle\\daemon\\8.13\\com.tejaassistant.app-main-41:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\ss\\.gradle\\daemon\\8.13\\com.tejaassistant.app-merged_res-39:\\drawable_ic_launcher.xml.flat",
+        "source": "C:\\Users\\ss\\.gradle\\daemon\\8.13\\com.tejaassistant.app-main-41:\\drawable\\ic_launcher.xml"
+    }
+]

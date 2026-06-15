@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.tejaassistant.app-mergeDebugResources-34:/values-v22/values-v22.xml",
+            "outputFile": "com.tejaassistant.app-mergeDebugResources-37:/values-v22/values-v22.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\ss\\.gradle\\caches\\transforms-3\\bfc9d58bcbb892591879d0d3afa5691e\\transformed\\appcompat-1.6.1\\res\\values-v22\\values-v22.xml",
+                    "source": "C:\\Users\\ss\\.gradle\\caches\\8.13\\transforms\\621cda62b9f5d08c781f273071a96fad\\transformed\\appcompat-1.6.1\\res\\values-v22\\values-v22.xml",
                     "from": {
                         "startLines": "2,3,4,9",
                         "startColumns": "4,4,4,4",

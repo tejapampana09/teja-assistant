@@ -1,10 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Teja Assistant</string>
     <string name="default_web_client_id" translatable="false">291987997272-ln3lr7opd0l01sfsorrop94r18hhjcom.apps.googleusercontent.com</string>
+    <string name="enable_notification_access">Enable Notification Access</string>
+    <string name="firebase_client_missing">Google sign-in is not configured for this Android app.</string>
     <string name="gcm_defaultSenderId" translatable="false">291987997272</string>
     <string name="google_api_key" translatable="false">AIzaSyCwM43edpoyEKtFTkahtxs0bYaC3VKrE4A</string>
     <string name="google_app_id" translatable="false">1:291987997272:android:4910483150ea4f04bec02d</string>
     <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCwM43edpoyEKtFTkahtxs0bYaC3VKrE4A</string>
     <string name="google_storage_bucket" translatable="false">notes-app-b23a4.firebasestorage.app</string>
+    <string name="logged_in_as">Signed in as: </string>
+    <string name="login_failed">Sign-in failed: </string>
+    <string name="login_success">Signed in successfully!</string>
+    <string name="not_logged_in">Not signed in</string>
+    <string name="notification_access_active">Notification Access Active</string>
+    <string name="notification_status_disabled">Notification access required</string>
+    <string name="notification_status_enabled">Notification access enabled</string>
+    <string name="permission_granted">Notification access already granted!</string>
     <string name="project_id" translatable="false">notes-app-b23a4</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <style name="Theme.TejaAssistant" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">#22D3EE</item>
+        <item name="colorPrimaryVariant">#0891B2</item>
+        <item name="colorOnPrimary">#0F172A</item>
+        <item name="colorSecondary">#818CF8</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:statusBarColor">#05070C</item>
+        <item name="android:windowBackground">#05070C</item>
+        <item name="android:navigationBarColor">#07101D</item>
+    </style>
+    <style name="Theme.TejaAssistant.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

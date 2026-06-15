@@ -1,19 +1,18 @@
-import { Bot, CheckSquare, Home, Inbox, Database, LogOut, Menu, MessageSquare, Mic, Search, StickyNote, SunMedium, UserCircle } from "lucide-react";
+import { Bot, CheckSquare, Home, Inbox, LogOut, Menu, MessageSquare, Phone, Search, StickyNote, UserCircle } from "lucide-react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useSearch } from "../../hooks/useSearch";
+import { GlobalCallMonitor } from "../../features/communication/GlobalCallMonitor";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: Home },
   { to: "/chat", label: "Chat", icon: MessageSquare },
-  { to: "/voice", label: "Voice", icon: Mic },
   { to: "/communication", label: "Comms", icon: Inbox },
-  { to: "/briefing", label: "Briefing", icon: SunMedium },
+  { to: "/calls", label: "Calls", icon: Phone },
   { to: "/tasks", label: "Tasks", icon: CheckSquare },
-  { to: "/memories", label: "Memories", icon: StickyNote },
-  { to: "/integrations", label: "Google", icon: Database }
+  { to: "/memories", label: "Memory", icon: StickyNote },
 ];
 
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -229,7 +228,7 @@ export function AppShell() {
       )}
 
 
-      <nav className="fixed bottom-4 left-4 right-4 z-40 grid grid-cols-4 rounded-3xl border border-white/10 bg-slate-950/80 p-2 shadow-panel backdrop-blur-2xl sm:grid-cols-7 lg:hidden">
+      <nav className="fixed bottom-4 left-4 right-4 z-40 grid grid-cols-6 rounded-3xl border border-white/10 bg-slate-950/80 p-2 shadow-panel backdrop-blur-2xl lg:hidden">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -246,6 +245,7 @@ export function AppShell() {
           </NavLink>
         ))}
       </nav>
+      <GlobalCallMonitor />
     </div>
   );
 }

@@ -13,3 +13,5 @@ export const userNotifications = (userId: string) =>
   collection(userDoc(userId), "notifications");
 export const userVoiceSettings = (userId: string) =>
   doc(userDoc(userId), "settings", "voice");
+export const userCallRequest = (userId: string) =>
+  doc(userDoc(userId), "callRequest", "outgoing");

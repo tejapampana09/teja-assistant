@@ -1,39 +1,42 @@
-com.tejaassistant.app-cardview-1.0.0-0 C:\Users\ss\.gradle\caches\transforms-3\00f184bd94605f066e9c8fafd2691131\transformed\cardview-1.0.0\res
-com.tejaassistant.app-firebase-common-20.4.2-1 C:\Users\ss\.gradle\caches\transforms-3\1a424de2fbc672c7c0ce2e8f50d6c6f9\transformed\firebase-common-20.4.2\res
-com.tejaassistant.app-play-services-basement-18.1.0-2 C:\Users\ss\.gradle\caches\transforms-3\2ba3248b69a90af0fdc770243394ce18\transformed\play-services-basement-18.1.0\res
-com.tejaassistant.app-annotation-experimental-1.3.0-3 C:\Users\ss\.gradle\caches\transforms-3\49b7331b78c5780af4dea4a6b535389d\transformed\annotation-experimental-1.3.0\res
-com.tejaassistant.app-activity-1.8.0-4 C:\Users\ss\.gradle\caches\transforms-3\514efee258e6ead3c3b05390fadaa461\transformed\activity-1.8.0\res
-com.tejaassistant.app-core-runtime-2.2.0-5 C:\Users\ss\.gradle\caches\transforms-3\5993c3ec95386433720ea2cd49d3386a\transformed\core-runtime-2.2.0\res
-com.tejaassistant.app-viewpager2-1.0.0-6 C:\Users\ss\.gradle\caches\transforms-3\64f7c247c4ee7a8ca01773349565ae6b\transformed\viewpager2-1.0.0\res
-com.tejaassistant.app-lifecycle-livedata-core-2.6.1-7 C:\Users\ss\.gradle\caches\transforms-3\7e1e864bafd5c75bab76533218c2a27b\transformed\lifecycle-livedata-core-2.6.1\res
-com.tejaassistant.app-constraintlayout-2.1.4-8 C:\Users\ss\.gradle\caches\transforms-3\8fbdcfa4650a50574bd547a06721f870\transformed\constraintlayout-2.1.4\res
-com.tejaassistant.app-core-1.12.0-9 C:\Users\ss\.gradle\caches\transforms-3\94f73a8796e77b8747e5b4d26aa1c674\transformed\core-1.12.0\res
-com.tejaassistant.app-appcompat-resources-1.6.1-10 C:\Users\ss\.gradle\caches\transforms-3\95821dcb0f7fb3e137277ecc9a299989\transformed\appcompat-resources-1.6.1\res
-com.tejaassistant.app-play-services-base-18.0.1-11 C:\Users\ss\.gradle\caches\transforms-3\965ef845aaec2773905a9f22d48947a8\transformed\play-services-base-18.0.1\res
-com.tejaassistant.app-emoji2-1.2.0-12 C:\Users\ss\.gradle\caches\transforms-3\9a47b8ddae7ff34af30fa60d965ecac3\transformed\emoji2-1.2.0\res
-com.tejaassistant.app-savedstate-1.2.1-13 C:\Users\ss\.gradle\caches\transforms-3\9ed2815260cb53347d66c6d60480a1d0\transformed\savedstate-1.2.1\res
-com.tejaassistant.app-lifecycle-viewmodel-2.6.1-14 C:\Users\ss\.gradle\caches\transforms-3\9f2b0dd8d495efca6cde20b18092bd0b\transformed\lifecycle-viewmodel-2.6.1\res
-com.tejaassistant.app-fragment-1.3.6-15 C:\Users\ss\.gradle\caches\transforms-3\a2bbc21455594b13152b105d8c14e12d\transformed\fragment-1.3.6\res
-com.tejaassistant.app-browser-1.4.0-16 C:\Users\ss\.gradle\caches\transforms-3\a38a3840bc94a53f3c4b94401a19bdbe\transformed\browser-1.4.0\res
-com.tejaassistant.app-transition-1.2.0-17 C:\Users\ss\.gradle\caches\transforms-3\ab1b8cd747074de1dca98f46fbca27f9\transformed\transition-1.2.0\res
-com.tejaassistant.app-lifecycle-livedata-2.6.1-18 C:\Users\ss\.gradle\caches\transforms-3\ab5d3daf25349a09d72b4210d8443025\transformed\lifecycle-livedata-2.6.1\res
-com.tejaassistant.app-startup-runtime-1.1.1-19 C:\Users\ss\.gradle\caches\transforms-3\af5fd1f16ebff61aff2540b0fb8f0b05\transformed\startup-runtime-1.1.1\res
-com.tejaassistant.app-lifecycle-viewmodel-savedstate-2.6.1-20 C:\Users\ss\.gradle\caches\transforms-3\b369b36d5f53ca6406f0d9f662c5cc27\transformed\lifecycle-viewmodel-savedstate-2.6.1\res
-com.tejaassistant.app-emoji2-views-helper-1.2.0-21 C:\Users\ss\.gradle\caches\transforms-3\b8ab9fe4055de7c8380b9b7bbf38787d\transformed\emoji2-views-helper-1.2.0\res
-com.tejaassistant.app-appcompat-1.6.1-22 C:\Users\ss\.gradle\caches\transforms-3\bfc9d58bcbb892591879d0d3afa5691e\transformed\appcompat-1.6.1\res
-com.tejaassistant.app-coordinatorlayout-1.1.0-23 C:\Users\ss\.gradle\caches\transforms-3\c93c9a9a791f1987334cd1e08ce268d8\transformed\coordinatorlayout-1.1.0\res
-com.tejaassistant.app-drawerlayout-1.1.1-24 C:\Users\ss\.gradle\caches\transforms-3\da37906f3b96de4cf64f99385ff234df\transformed\drawerlayout-1.1.1\res
-com.tejaassistant.app-profileinstaller-1.3.0-25 C:\Users\ss\.gradle\caches\transforms-3\db06a1645078b82637612114499f7366\transformed\profileinstaller-1.3.0\res
-com.tejaassistant.app-recyclerview-1.1.0-26 C:\Users\ss\.gradle\caches\transforms-3\df7d92692f4afa04b9ec9754025330c8\transformed\recyclerview-1.1.0\res
-com.tejaassistant.app-lifecycle-runtime-2.6.1-27 C:\Users\ss\.gradle\caches\transforms-3\e1cde528af104550a8c15c05465fe129\transformed\lifecycle-runtime-2.6.1\res
-com.tejaassistant.app-material-1.11.0-28 C:\Users\ss\.gradle\caches\transforms-3\f3a8c5c83d807b19a9dfc2af4ee71209\transformed\material-1.11.0\res
-com.tejaassistant.app-core-ktx-1.12.0-29 C:\Users\ss\.gradle\caches\transforms-3\f5c5b659d0e39b8b98eb010918829a1f\transformed\core-ktx-1.12.0\res
-com.tejaassistant.app-lifecycle-process-2.6.1-30 C:\Users\ss\.gradle\caches\transforms-3\fb034288afce7912a84bc8484300b32d\transformed\lifecycle-process-2.6.1\res
-com.tejaassistant.app-pngs-31 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\generated\res\pngs\debug
-com.tejaassistant.app-res-32 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\generated\res\processDebugGoogleServices
-com.tejaassistant.app-resValues-33 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\generated\res\resValues\debug
-com.tejaassistant.app-packageDebugResources-34 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.tejaassistant.app-packageDebugResources-35 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.tejaassistant.app-merged_res-36 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\intermediates\merged_res\debug
-com.tejaassistant.app-debug-37 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\src\debug\res
-com.tejaassistant.app-main-38 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\src\main\res
+com.tejaassistant.app-emoji2-1.2.0-0 C:\Users\ss\.gradle\caches\8.13\transforms\0a458bbf1e28c45b3fb57fc10f84175d\transformed\emoji2-1.2.0\res
+com.tejaassistant.app-lifecycle-livedata-core-2.7.0-1 C:\Users\ss\.gradle\caches\8.13\transforms\13abf6aee10f18618f2c83f0e7197105\transformed\lifecycle-livedata-core-2.7.0\res
+com.tejaassistant.app-lifecycle-viewmodel-savedstate-2.7.0-2 C:\Users\ss\.gradle\caches\8.13\transforms\1c2cfad5f882bcad12a84b97227aaa3a\transformed\lifecycle-viewmodel-savedstate-2.7.0\res
+com.tejaassistant.app-play-services-auth-21.0.0-3 C:\Users\ss\.gradle\caches\8.13\transforms\20c7fb65ec60f9c358cb66e0502f6d6b\transformed\play-services-auth-21.0.0\res
+com.tejaassistant.app-browser-1.4.0-4 C:\Users\ss\.gradle\caches\8.13\transforms\21168cc52f72bc9c35bfe91aa4052d17\transformed\browser-1.4.0\res
+com.tejaassistant.app-firebase-common-21.0.0-5 C:\Users\ss\.gradle\caches\8.13\transforms\22078ec59ae9d16481a62f8ca535161a\transformed\firebase-common-21.0.0\res
+com.tejaassistant.app-cardview-1.0.0-6 C:\Users\ss\.gradle\caches\8.13\transforms\309b2b041600c6baf2aace44e575d2de\transformed\cardview-1.0.0\res
+com.tejaassistant.app-core-runtime-2.2.0-7 C:\Users\ss\.gradle\caches\8.13\transforms\332ac7811eccd051836e0a40c7359ede\transformed\core-runtime-2.2.0\res
+com.tejaassistant.app-drawerlayout-1.1.1-8 C:\Users\ss\.gradle\caches\8.13\transforms\44ed6754adac65a37d22adc0c6d89a3b\transformed\drawerlayout-1.1.1\res
+com.tejaassistant.app-credentials-1.2.0-rc01-9 C:\Users\ss\.gradle\caches\8.13\transforms\537675b4e69c801df7bf104df17c5760\transformed\credentials-1.2.0-rc01\res
+com.tejaassistant.app-play-services-basement-18.3.0-10 C:\Users\ss\.gradle\caches\8.13\transforms\5db9ac2cec64670dda5378883fc1caa4\transformed\play-services-basement-18.3.0\res
+com.tejaassistant.app-core-1.12.0-11 C:\Users\ss\.gradle\caches\8.13\transforms\5e45fdf17c593e126d9add012d75b9d9\transformed\core-1.12.0\res
+com.tejaassistant.app-core-ktx-1.12.0-12 C:\Users\ss\.gradle\caches\8.13\transforms\60ccc5781046057c3df4daeb0e626641\transformed\core-ktx-1.12.0\res
+com.tejaassistant.app-coordinatorlayout-1.1.0-13 C:\Users\ss\.gradle\caches\8.13\transforms\61e8fab452cf722979437374bad9251b\transformed\coordinatorlayout-1.1.0\res
+com.tejaassistant.app-appcompat-1.6.1-14 C:\Users\ss\.gradle\caches\8.13\transforms\621cda62b9f5d08c781f273071a96fad\transformed\appcompat-1.6.1\res
+com.tejaassistant.app-startup-runtime-1.1.1-15 C:\Users\ss\.gradle\caches\8.13\transforms\6c5bbe10367e10982fb9aa25dbbd4255\transformed\startup-runtime-1.1.1\res
+com.tejaassistant.app-lifecycle-process-2.7.0-16 C:\Users\ss\.gradle\caches\8.13\transforms\786c962aa5c25a5fc99b47803421ad27\transformed\lifecycle-process-2.7.0\res
+com.tejaassistant.app-material-1.11.0-17 C:\Users\ss\.gradle\caches\8.13\transforms\7b8c24bf8e3441d6a59b6aba1bd6037f\transformed\material-1.11.0\res
+com.tejaassistant.app-lifecycle-runtime-2.7.0-18 C:\Users\ss\.gradle\caches\8.13\transforms\86e171396f362b692fa7594dd8bb4de5\transformed\lifecycle-runtime-2.7.0\res
+com.tejaassistant.app-annotation-experimental-1.3.0-19 C:\Users\ss\.gradle\caches\8.13\transforms\8ba2aba1ad1ae4ee24531b7e2490f7ea\transformed\annotation-experimental-1.3.0\res
+com.tejaassistant.app-lifecycle-runtime-ktx-2.7.0-20 C:\Users\ss\.gradle\caches\8.13\transforms\9f2d43b41b726e694772a26df065874b\transformed\lifecycle-runtime-ktx-2.7.0\res
+com.tejaassistant.app-constraintlayout-2.1.4-21 C:\Users\ss\.gradle\caches\8.13\transforms\a1d4c02ddcecd2b752fa03e96f985747\transformed\constraintlayout-2.1.4\res
+com.tejaassistant.app-recyclerview-1.1.0-22 C:\Users\ss\.gradle\caches\8.13\transforms\a534c1906811727afcd57628f3033b70\transformed\recyclerview-1.1.0\res
+com.tejaassistant.app-fragment-1.5.7-23 C:\Users\ss\.gradle\caches\8.13\transforms\aa38e8cde0d40ee2b35c8a853164e577\transformed\fragment-1.5.7\res
+com.tejaassistant.app-emoji2-views-helper-1.2.0-24 C:\Users\ss\.gradle\caches\8.13\transforms\ad5ab0d68206076aa821905a30547683\transformed\emoji2-views-helper-1.2.0\res
+com.tejaassistant.app-appcompat-resources-1.6.1-25 C:\Users\ss\.gradle\caches\8.13\transforms\b5ec53b1f74711888c8509f07f2fbc72\transformed\appcompat-resources-1.6.1\res
+com.tejaassistant.app-transition-1.2.0-26 C:\Users\ss\.gradle\caches\8.13\transforms\cd3d2a728c3aed113b517cfd5f7037db\transformed\transition-1.2.0\res
+com.tejaassistant.app-profileinstaller-1.3.0-27 C:\Users\ss\.gradle\caches\8.13\transforms\de1e7ada9b978002e920dc5c47ea56f8\transformed\profileinstaller-1.3.0\res
+com.tejaassistant.app-activity-1.8.0-28 C:\Users\ss\.gradle\caches\8.13\transforms\edd69bc4365083f1ec7af1c41d8ce718\transformed\activity-1.8.0\res
+com.tejaassistant.app-lifecycle-viewmodel-2.7.0-29 C:\Users\ss\.gradle\caches\8.13\transforms\ef1fae684916b9e90dcfee532e50f6e4\transformed\lifecycle-viewmodel-2.7.0\res
+com.tejaassistant.app-play-services-base-18.0.1-30 C:\Users\ss\.gradle\caches\8.13\transforms\f16653c75eb3bb81e4c56aab8827a15f\transformed\play-services-base-18.0.1\res
+com.tejaassistant.app-credentials-play-services-auth-1.2.0-rc01-31 C:\Users\ss\.gradle\caches\8.13\transforms\f3b473531ed6c13e8097db432f16e5a2\transformed\credentials-play-services-auth-1.2.0-rc01\res
+com.tejaassistant.app-savedstate-1.2.1-32 C:\Users\ss\.gradle\caches\8.13\transforms\f83dc74ade9a15e21678b68773b9e66d\transformed\savedstate-1.2.1\res
+com.tejaassistant.app-viewpager2-1.0.0-33 C:\Users\ss\.gradle\caches\8.13\transforms\fa7a347aefb04bab3fefd2aba7ba1f60\transformed\viewpager2-1.0.0\res
+com.tejaassistant.app-pngs-34 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\generated\res\pngs\debug
+com.tejaassistant.app-res-35 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\generated\res\processDebugGoogleServices
+com.tejaassistant.app-resValues-36 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\generated\res\resValues\debug
+com.tejaassistant.app-packageDebugResources-37 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.tejaassistant.app-packageDebugResources-38 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.tejaassistant.app-merged_res-39 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\build\intermediates\merged_res\debug
+com.tejaassistant.app-debug-40 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\src\debug\res
+com.tejaassistant.app-main-41 C:\Users\ss\Desktop\portfolio-personal\portfolio-personal-main\teja assistant\android\app\src\main\res

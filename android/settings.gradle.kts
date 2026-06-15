@@ -5,11 +5,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-}
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
@@ -18,3 +15,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Teja Assistant"
 include(":app")
+include(":capacitor-android")
+project(":capacitor-android").projectDir = file("../node_modules/@capacitor/android/capacitor")
+include(":capacitor-cordova-android-plugins")
+project(":capacitor-cordova-android-plugins").projectDir = file("capacitor-cordova-android-plugins")

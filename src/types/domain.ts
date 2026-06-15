@@ -77,7 +77,7 @@ export type VoiceSettings = {
   voiceName?: string;
 };
 
-export type CommunicationChannel = "whatsapp" | "gmail" | "linkedin" | "telegram" | "manual";
+export type CommunicationChannel = "whatsapp" | "gmail" | "instagram" | "sms" | "linkedin" | "telegram" | "manual" | "call";
 
 export type ContactCategory = "Friend" | "Family" | "Faculty" | "Recruiter" | "Unknown";
 
@@ -88,6 +88,7 @@ export type ContactProfile = {
   preferredTone: "Short" | "Friendly" | "Professional";
   relationship: string;
   replyStyle: string;
+  phoneNumber?: string;
   channelHandles?: Partial<Record<CommunicationChannel, string>>;
   createdAt?: FirestoreDate;
   updatedAt?: FirestoreDate;
@@ -97,6 +98,7 @@ export type ReplySuggestions = {
   short: string;
   friendly: string;
   professional: string;
+  summary?: string;
 };
 
 export type MessageUrgency = "low" | "medium" | "high";
@@ -126,12 +128,20 @@ export type CommunicationMessage = {
   channel: CommunicationChannel;
   direction: "incoming" | "outgoing";
   senderName: string;
+  sender?: string; // New field for compatibility
   content: string;
   timestamp?: FirestoreDate;
+  unread?: boolean; // New field
+  archived?: boolean; // New field
+  aiSummary?: string; // New field
   suggestions?: ReplySuggestions;
+  replySuggestions?: string[]; // New field
   aiAnalysis?: MessageAiAnalysis;
   priority?: MessageUrgency;
-  source: "manual" | "android_notification" | "future_integration";
+  source: "manual" | "android_notification" | "future_integration" | "web_app" | "android_telephony";
+  status?: "pending" | "sent" | "failed" | "ringing" | "in_progress" | "missed" | "completed";
+  durationMs?: number;
+  contactPhone?: string; // phone number for call history dial-back
   createdAt?: FirestoreDate;
 };
 

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.tejaassistant.app-mergeDebugResources-34:/values-w400dp-port-v13/values-w400dp-port-v13.xml",
+            "outputFile": "com.tejaassistant.app-mergeDebugResources-37:/values-w400dp-port-v13/values-w400dp-port-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\ss\\.gradle\\caches\\transforms-3\\f3a8c5c83d807b19a9dfc2af4ee71209\\transformed\\material-1.11.0\\res\\values-w400dp-port-v13\\values-w400dp-port-v13.xml",
+                    "source": "C:\\Users\\ss\\.gradle\\caches\\8.13\\transforms\\7b8c24bf8e3441d6a59b6aba1bd6037f\\transformed\\material-1.11.0\\res\\values-w400dp-port-v13\\values-w400dp-port-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",

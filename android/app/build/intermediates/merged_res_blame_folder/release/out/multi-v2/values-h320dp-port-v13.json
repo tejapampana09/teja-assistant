@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.tejaassistant.app-mergeReleaseResources-37:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\ss\\.gradle\\caches\\8.13\\transforms\\7b8c24bf8e3441d6a59b6aba1bd6037f\\transformed\\material-1.11.0\\res\\values-h320dp-port-v13\\values-h320dp-port-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "63",
+                        "endOffsets": "114"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,9 +1,27 @@
 R_DEF: Internal format may change without notice
 local
+drawable ic_launcher
+id webView
+layout activity_main
+string app_name
 string default_web_client_id
+string enable_notification_access
+string firebase_client_missing
 string gcm_defaultSenderId
 string google_api_key
 string google_app_id
 string google_crash_reporting_api_key
 string google_storage_bucket
+string logged_in_as
+string login_failed
+string login_success
+string not_logged_in
+string notification_access_active
+string notification_status_disabled
+string notification_status_enabled
+string permission_granted
 string project_id
+string sign_in_with_google
+style Theme.TejaAssistant
+style Theme.TejaAssistant.NoActionBar
+xml config

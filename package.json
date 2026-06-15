@@ -8,10 +8,15 @@
     "server": "tsx watch server/index.ts",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "tsc -b && vite build",
+    "cap:sync": "npm run build && cap sync android",
+    "cap:open": "cap open android",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
     "@vitejs/plugin-react": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

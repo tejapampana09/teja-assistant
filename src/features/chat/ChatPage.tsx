@@ -1,5 +1,5 @@
-import { addDoc, orderBy, query, serverTimestamp } from "firebase/firestore";
-import { Bot, Loader2, Send, Sparkles, User } from "lucide-react";
+import { addDoc, deleteDoc, getDocs, orderBy, query, serverTimestamp } from "firebase/firestore";
+import { Bot, Loader2, Send, Sparkles, User, Trash2 } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
@@ -17,7 +17,7 @@ const starterPrompts = [
 
 export function ChatPage() {
   const { user } = useAuth();
-  const { error: toastError } = useToast();
+  const { success, error: toastError } = useToast();
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -31,6 +31,25 @@ export function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, sending]);
+
+  async function clearChatHistory() {
+    if (!user) return;
+    if (!window.confirm("Are you sure you want to clear your AI Assistant chat history?")) return;
+
+    setSending(true);
+    try {
+      const snapshot = await getDocs(userMessages(user.uid));
+      for (const docSnap of snapshot.docs) {
+        await deleteDoc(docSnap.ref);
+      }
+      success("Chat history cleared");
+    } catch (error) {
+      console.error(error);
+      toastError("Failed to clear chat history");
+    } finally {
+      setSending(false);
+    }
+  }
 
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -87,8 +106,21 @@ export function ChatPage() {
               <p className="text-sm text-cyan-200">AI Chat</p>
               <h1 className="mt-1 text-2xl font-semibold md:text-3xl">Talk to Teja Assistant</h1>
             </div>
-            <div className="hidden rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100 sm:block">
-              History saved
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="hidden rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-100 sm:block">
+                History saved
+              </div>
+              {messages.length > 0 && (
+                <button
+                  onClick={() => void clearChatHistory()}
+                  disabled={sending}
+                  className="ghost-button py-1.5 px-3 text-xs text-red-400 hover:bg-red-500/10 border border-white/10 rounded-xl flex items-center gap-1.5"
+                  title="Clear Chat History"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear History
+                </button>
+              )}
             </div>
           </div>
         </div>

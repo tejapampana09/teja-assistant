@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.tejaassistant.app-mergeDebugResources-35:/values-ldrtl-v17/values-ldrtl-v17.xml",
+            "outputFile": "com.tejaassistant.app-mergeDebugResources-41:/values-ldrtl-v17/values-ldrtl-v17.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\ss\\.gradle\\caches\\8.13\\transforms\\b521330b9dea91e3ae507e535ed4f0aa\\transformed\\material-1.11.0\\res\\values-ldrtl-v17\\values-ldrtl-v17.xml",
+                    "source": "C:\\Users\\ss\\.gradle\\caches\\8.13\\transforms\\52db008c84171326658fca3cbc647a31\\transformed\\material-1.11.0\\res\\values-ldrtl-v17\\values-ldrtl-v17.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",

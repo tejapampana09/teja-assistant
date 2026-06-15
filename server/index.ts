@@ -184,9 +184,15 @@ function startFirebaseListeners() {
         if (change.type === 'added') {
           const data = change.doc.data();
           
-          // Only process Android notifications that don't have suggestions yet
-          if (data.source === 'android_notification' && !data.suggestions) {
-            console.log(`[Firebase Listener] New un-processed Android notification: ${change.doc.id}`);
+          // Process ALL incoming messages that don't have suggestions yet
+          // Previously only handled android_notification — now handles all sources
+          const isIncoming = data.direction === 'incoming';
+          const hasNoSuggestions = !data.suggestions && !data.replySuggestions;
+          const hasContent = data.content && data.content.trim().length > 0;
+          const isCallChannel = data.channel === 'call'; // skip call-log entries
+          
+          if (isIncoming && hasNoSuggestions && hasContent && !isCallChannel) {
+            console.log(`[Firebase Listener] Generating suggestions for ${change.doc.id} (source: ${data.source})`);
             
             let relationship = "Unknown";
             const userId = change.doc.ref.parent.parent?.id;
@@ -203,9 +209,10 @@ function startFirebaseListeners() {
             }
             
             const suggestions = await generateSuggestionsDirectly(data.content || "", relationship);
+            const replySuggestions = [suggestions.short, suggestions.friendly, suggestions.professional];
             
             try {
-              await change.doc.ref.update({ suggestions });
+              await change.doc.ref.update({ suggestions, replySuggestions });
               console.log(`[Firebase Listener] Suggestions saved for message: ${change.doc.id}`);
             } catch (e) {
               console.error(`[Firebase Listener] Error updating message ${change.doc.id}:`, e);
@@ -213,6 +220,8 @@ function startFirebaseListeners() {
           }
         }
       });
+    }, (error) => {
+      console.error("[Firebase Listener] Error in onSnapshot listener:", error);
     });
 }
 
@@ -234,13 +243,13 @@ async function generateSuggestionsDirectly(message: string, relationship: string
       },
       body: JSON.stringify({
         model,
-        temperature: 0.25,
-        max_tokens: 220,
+        temperature: 0.3,
+        max_tokens: 250,
         response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
-            content: "Generate WhatsApp reply suggestions as JSON with keys short, friendly, professional. Keep replies natural. Do not auto-send anything."
+            content: "You are an expert personal communication assistant. Generate three distinct, highly natural reply options for the given incoming message based on the relationship. The replies should be brief, direct, and sound like a real human text message. Since the user is Teja (Indian student/developer), feel free to use simple conversational Hinglish/Telugish mixed terms (like 'bro', 'chesta', 'choosta', 'avunu', 'ledu') where appropriate for the casual friendly option. Return a JSON object with keys 'short' (1-4 words), 'friendly' (warm, casual, Hinglish/Telugish/English mix), 'professional' (polite, clean, brief English), and 'summary' (a single concise sentence summarizing the message)."
           },
           {
             role: "user",
@@ -259,7 +268,8 @@ async function generateSuggestionsDirectly(message: string, relationship: string
     return {
       short: parsed.short || fallbackSuggestions(message).short,
       friendly: parsed.friendly || fallbackSuggestions(message).friendly,
-      professional: parsed.professional || fallbackSuggestions(message).professional
+      professional: parsed.professional || fallbackSuggestions(message).professional,
+      summary: parsed.summary || fallbackSuggestions(message).summary
     };
   } catch (error) {
     console.error(error);
@@ -285,12 +295,22 @@ function fallbackReply(message: string) {
 
 function fallbackSuggestions(message: string) {
   const lower = message.toLowerCase();
+  let summary = "Sender sent a general message.";
+  
+  if (lower.includes("project") || lower.includes("complete")) {
+    summary = "Sender is asking for project progress.";
+  } else if (lower.includes("meeting") || lower.includes("call")) {
+    summary = "Sender is asking about a meeting or call schedule.";
+  } else if (lower.includes("hi") || lower.includes("hello") || lower.includes("hey")) {
+    summary = "Sender is greeting you.";
+  }
 
   if (lower.includes("project") || lower.includes("complete")) {
     return {
       short: "Almost bro.",
       friendly: "Almost bro, testing chesthunna.",
-      professional: "The project is nearly complete. Currently testing."
+      professional: "The project is nearly complete. Currently testing.",
+      summary
     };
   }
 
@@ -298,14 +318,16 @@ function fallbackSuggestions(message: string) {
     return {
       short: "Okay, noted.",
       friendly: "Sure, I will check and confirm.",
-      professional: "Thank you for the update. I will review and confirm shortly."
+      professional: "Thank you for the update. I will review and confirm shortly.",
+      summary
     };
   }
 
   return {
     short: "Okay.",
     friendly: "Sure, I will get back to you.",
-    professional: "Thank you for your message. I will respond shortly."
+    professional: "Thank you for your message. I will respond shortly.",
+    summary
   };
 }
 
@@ -316,4 +338,13 @@ app.use((err: any, req: any, res: any, next: any) => {
     error: err.message || "An unexpected error occurred on the server."
   });
 });
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[Process] Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("[Process] Uncaught Exception caught:", error);
+});
+
 

@@ -6,8 +6,8 @@ import { EmptyState } from "../../components/ui/EmptyState";
 import { StatCard } from "../../components/ui/StatCard";
 import { useAuth } from "../../context/AuthContext";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
-import { userMemories, userMessages, userTasks } from "../../services/paths";
-import type { ChatMessage, Memory, Task } from "../../types/domain";
+import { userMemories, userMessages, userTasks, userCommunicationMessages } from "../../services/paths";
+import type { ChatMessage, Memory, Task, CommunicationMessage } from "../../types/domain";
 import { formatDateTime, getGreeting } from "../../utils/date";
 import { checkGoogleConnection } from "../../services/googleAuth";
 import { fetchUpcomingEvents, CalendarEvent } from "../../services/calendar";
@@ -31,10 +31,12 @@ export function DashboardPage() {
   const tasksQuery = useMemo(() => user ? query(userTasks(user.uid), orderBy("createdAt", "desc")) : null, [user]);
   const memoryQuery = useMemo(() => user ? query(userMemories(user.uid), orderBy("createdAt", "desc")) : null, [user]);
   const messageQuery = useMemo(() => user ? query(userMessages(user.uid), orderBy("createdAt", "desc"), limit(5)) : null, [user]);
+  const commMessagesQuery = useMemo(() => user ? query(userCommunicationMessages(user.uid), orderBy("createdAt", "desc")) : null, [user]);
 
   const { data: tasks } = useFirestoreCollection<Task>(tasksQuery);
   const { data: memories } = useFirestoreCollection<Memory>(memoryQuery);
   const { data: messages } = useFirestoreCollection<ChatMessage>(messageQuery);
+  const { data: commMessages } = useFirestoreCollection<CommunicationMessage>(commMessagesQuery);
 
   const [googleConnected, setGoogleConnected] = useState<boolean>(false);
   const [emails, setEmails] = useState<GmailMessage[]>([]);
@@ -43,6 +45,51 @@ export function DashboardPage() {
 
   const completed = tasks.filter((task) => task.status === "completed").length;
   const activeProjects = memories.filter((memory) => memory.category === "Projects").length;
+
+  const todayCommStats = useMemo(() => {
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+    const todayMsgs = commMessages.filter((m) => {
+      const dateStr = m.timestamp || m.createdAt;
+      if (!dateStr) return false;
+      const t = typeof dateStr === 'string' ? new Date(dateStr).getTime() : (dateStr as any).seconds ? (dateStr as any).seconds * 1000 : 0;
+      return t >= startOfToday;
+    });
+
+    const counts: Record<string, number> = { whatsapp: 0, gmail: 0, instagram: 0, sms: 0, call: 0 };
+    todayMsgs.forEach((msg) => {
+      if (counts[msg.channel] !== undefined) {
+        counts[msg.channel]++;
+      }
+    });
+
+    const unreads = commMessages.filter((m) => m.direction === 'incoming' && m.unread !== false && !m.archived);
+
+    // AI Communication summary
+    let summaryText = "No notifications today.";
+    if (todayMsgs.length > 0) {
+      const activeSenders = Array.from(new Set(todayMsgs.map((m) => m.senderName || m.sender).filter(Boolean)));
+      summaryText = `Received ${todayMsgs.length} messages today from ${activeSenders.join(", ")}.`;
+    } else if (unreads.length > 0) {
+      summaryText = `You have ${unreads.length} unread notifications waiting.`;
+    }
+
+    // Most Important Message (the latest incoming unread message)
+    const mostImportant = unreads[0] || null;
+
+    return {
+      whatsapp: counts.whatsapp,
+      gmail: counts.gmail,
+      instagram: counts.instagram,
+      sms: counts.sms,
+      call: counts.call,
+      totalToday: todayMsgs.length,
+      unreads: unreads.length,
+      summaryText,
+      mostImportant
+    };
+  }, [commMessages]);
 
   useEffect(() => {
     if (!user) return;
@@ -102,6 +149,86 @@ export function DashboardPage() {
             <StatusRow label="Database" value="Firestore realtime" />
             <StatusRow label="AI Layer" value="API-ready" />
           </div>
+        </div>
+      </section>
+
+      {/* AI Communication Hub Overview */}
+      <section className="grid gap-5 md:grid-cols-2">
+        {/* Today's Communication Summary */}
+        <div className="glass-panel rounded-[2rem] p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-cyan-200" />
+              Communication Summary
+            </h2>
+            <span className="text-xs bg-cyan-400/10 text-cyan-200 border border-cyan-400/20 px-2.5 py-1 rounded-full font-semibold">
+              Today
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 flex flex-col justify-between">
+              <span className="text-xs text-slate-400">WhatsApp</span>
+              <span className="text-2xl font-bold mt-1 text-white">{todayCommStats.whatsapp}</span>
+            </div>
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 flex flex-col justify-between">
+              <span className="text-xs text-slate-400">Gmail</span>
+              <span className="text-2xl font-bold mt-1 text-white">{todayCommStats.gmail}</span>
+            </div>
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 flex flex-col justify-between">
+              <span className="text-xs text-slate-400">Instagram</span>
+              <span className="text-2xl font-bold mt-1 text-white">{todayCommStats.instagram}</span>
+            </div>
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 flex flex-col justify-between">
+              <span className="text-xs text-slate-400">SMS</span>
+              <span className="text-2xl font-bold mt-1 text-white">{todayCommStats.sms}</span>
+            </div>
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-4 flex flex-col justify-between">
+              <span className="text-xs text-slate-400">Calls</span>
+              <span className="text-2xl font-bold mt-1 text-white">{todayCommStats.call}</span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-cyan-400/5 border border-cyan-400/10 p-4 space-y-1">
+            <p className="text-xs font-semibold text-cyan-200 uppercase tracking-wider">AI Inbox Overview</p>
+            <p className="text-sm text-slate-300 leading-relaxed">{todayCommStats.summaryText}</p>
+          </div>
+        </div>
+
+        {/* Most Important Message */}
+        <div className="glass-panel rounded-[2rem] p-6 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-yellow-300" />
+              Most Important Message
+            </h2>
+            <Link to="/comms" className="text-xs text-cyan-200 hover:underline">
+              Inbox
+            </Link>
+          </div>
+
+          {todayCommStats.mostImportant ? (
+            <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4 space-y-3 flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-white text-sm">{todayCommStats.mostImportant.senderName || todayCommStats.mostImportant.sender}</span>
+                  <span className="text-[10px] bg-yellow-500/15 text-yellow-300 border border-yellow-500/20 px-2 py-0.5 rounded-full uppercase shrink-0 font-semibold">
+                    {todayCommStats.mostImportant.channel}
+                  </span>
+                </div>
+                <p className="text-sm text-slate-300 mt-2 line-clamp-2">{todayCommStats.mostImportant.content}</p>
+              </div>
+              {todayCommStats.mostImportant.aiSummary && (
+                <div className="text-xs bg-black/20 p-2.5 rounded-xl text-yellow-200/80 border border-white/5 mt-2">
+                  <strong>Brief:</strong> {todayCommStats.mostImportant.aiSummary}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center border border-dashed border-white/10 rounded-2xl p-6 text-center flex-1">
+              <p className="text-sm text-slate-500">No urgent unread messages needing attention.</p>
+            </div>
+          )}
         </div>
       </section>
 

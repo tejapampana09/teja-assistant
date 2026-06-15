@@ -23,17 +23,15 @@ class WhatsAppNotificationRepository {
         private const val TAG = "WhatsAppRepo"
     }
 
-    // Dedicated IO scope with SupervisorJob so one failure doesn't cancel others
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun storeIncomingNotification(notification: WhatsAppNotification) {
         val user = Firebase.auth.currentUser
         if (user == null) {
-            Log.e(TAG, "User not logged in — skipping notification storage")
+            Log.w(TAG, "User not logged in; skipping notification storage")
             return
         }
 
-        // Deduplicate before any Firestore work
         if (NotificationDeduplicator.isDuplicate(
                 notification.senderName,
                 notification.message,
@@ -53,13 +51,17 @@ class WhatsAppNotificationRepository {
                     Locale.US
                 ).format(Date(notification.timestamp))
 
+                val channel = when (notification.packageName) {
+                    "com.instagram.android" -> "instagram"
+                    else -> "whatsapp"
+                }
+
                 val cleanName = notification.senderName
                     .replace("[^a-zA-Z0-9]".toRegex(), "")
                     .lowercase()
-                val contactId = "contact_$cleanName"
-                val conversationId = "conv_whatsapp_$cleanName"
+                val contactId = "contact_${channel}_$cleanName"
+                val conversationId = "conv_${channel}_$cleanName"
 
-                // 1. Upsert Contact
                 db.collection("users")
                     .document(userId)
                     .collection("contacts")
@@ -68,13 +70,12 @@ class WhatsAppNotificationRepository {
                         hashMapOf(
                             "name" to notification.senderName,
                             "category" to "Unknown",
-                            "channelHandles" to hashMapOf("whatsapp" to notification.senderName),
+                            "channelHandles" to hashMapOf(channel to notification.senderName),
                             "updatedAt" to FieldValue.serverTimestamp()
                         ),
                         SetOptions.merge()
                     ).await()
 
-                // 2. Upsert Conversation
                 db.collection("users")
                     .document(userId)
                     .collection("conversations")
@@ -83,7 +84,7 @@ class WhatsAppNotificationRepository {
                         hashMapOf(
                             "contactId" to contactId,
                             "contactName" to notification.senderName,
-                            "channel" to "whatsapp",
+                            "channel" to channel,
                             "lastMessage" to notification.message,
                             "lastMessageAt" to timestampStr,
                             "updatedAt" to FieldValue.serverTimestamp()
@@ -91,13 +92,12 @@ class WhatsAppNotificationRepository {
                         SetOptions.merge()
                     ).await()
 
-                // 3. Add Message document
                 db.collection("users")
                     .document(userId)
                     .collection("communicationMessages")
                     .add(
                         hashMapOf(
-                            "channel" to "whatsapp",
+                            "channel" to channel,
                             "direction" to "incoming",
                             "senderName" to notification.senderName,
                             "content" to notification.message,
@@ -109,7 +109,6 @@ class WhatsAppNotificationRepository {
                         )
                     ).await()
 
-                // 4. Log to notifications collection for audit trail
                 db.collection("users")
                     .document(userId)
                     .collection("notifications")
@@ -193,7 +192,7 @@ class WhatsAppNotificationRepository {
         try {
             action.pendingIntent.send(context, 0, intent)
         } catch (e: android.app.PendingIntent.CanceledException) {
-            Log.e(TAG, "PendingIntent cancelled — notification may have been dismissed", e)
+            Log.e(TAG, "PendingIntent cancelled; notification may have been dismissed", e)
         }
     }
 }

@@ -4,9 +4,24 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val buildWebApp by tasks.registering(Exec::class) {
+    workingDir = file("../..")
+    commandLine("cmd", "/c", "npm run build")
+}
+
+val syncCapacitorWebApp by tasks.registering(Sync::class) {
+    dependsOn(buildWebApp)
+    from(file("../../dist"))
+    into(layout.projectDirectory.dir("src/main/assets/public"))
+}
+
+tasks.named("preBuild") {
+    dependsOn(syncCapacitorWebApp)
+}
+
 android {
     namespace = "com.tejaassistant"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.tejaassistant"
@@ -29,7 +44,6 @@ android {
     buildTypes {
         debug {
             isMinifyEnabled = false
-            applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         release {
@@ -44,12 +58,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
 
     buildFeatures {
@@ -59,8 +73,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":capacitor-android"))
+    implementation(project(":capacitor-cordova-android-plugins"))
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -76,3 +93,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 }
+
+apply(from = "capacitor.build.gradle")

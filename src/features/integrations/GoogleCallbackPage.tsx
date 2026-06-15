@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { handleGoogleCallback } from "../../services/googleAuth";
 import { RefreshCw } from "lucide-react";
@@ -13,6 +13,8 @@ export default function GoogleCallbackPage() {
   const [status, setStatus] = useState<"processing" | "success" | "error">("processing");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
+  const hasCalled = useRef(false);
+
   useEffect(() => {
     const code = searchParams.get("code");
     const userId = searchParams.get("state");
@@ -22,6 +24,9 @@ export default function GoogleCallbackPage() {
       setErrorMsg("Missing OAuth authorization code or session state.");
       return;
     }
+
+    if (hasCalled.current) return;
+    hasCalled.current = true;
 
     const processOAuth = async () => {
       try {

@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.tejaassistant.app-mergeReleaseResources-38:/layout/activity_main.xml",
+        "source": "com.tejaassistant.app-main-41:/layout/activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\ss\\.gradle\\daemon\\8.13\\com.tejaassistant.app-mergeReleaseResources-38:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\ss\\.gradle\\daemon\\8.13\\com.tejaassistant.app-main-41:\\layout\\activity_main.xml"
+    }
+]

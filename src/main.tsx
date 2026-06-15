@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -9,6 +9,7 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { NotFoundPage } from "./features/auth/NotFoundPage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { ChatPage } from "./features/chat/ChatPage";
+import { CallsPage } from "./features/calls/CallsPage";
 import { CommunicationPage } from "./features/communication/CommunicationPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { MemoryPage } from "./features/memory/MemoryPage";
@@ -18,7 +19,9 @@ import IntegrationsPage from "./features/integrations/IntegrationsPage";
 import GoogleCallbackPage from "./features/integrations/GoogleCallbackPage";
 import "./styles.css";
 
-const router = createBrowserRouter([
+const createRouter = window.location.protocol === "file:" ? createHashRouter : createBrowserRouter;
+
+const router = createRouter([
   {
     path: "/login",
     element: <LoginPage />
@@ -34,6 +37,7 @@ const router = createBrowserRouter([
           { path: "chat", element: <ChatPage /> },
           { path: "voice", element: <VoicePage /> },
           { path: "communication", element: <CommunicationPage /> },
+          { path: "calls", element: <CallsPage /> },
           { path: "briefing", element: <BriefingPage /> },
           { path: "memories", element: <MemoryPage /> },
           { path: "tasks", element: <TasksPage /> },

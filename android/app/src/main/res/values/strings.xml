@@ -8,6 +8,8 @@
     <string name="login_failed">Sign-in failed: </string>
     <string name="not_logged_in">Not signed in</string>
     <string name="logged_in_as">Signed in as: </string>
-    <string name="notification_status_enabled">✓ Notification access enabled</string>
-    <string name="notification_status_disabled">⚠ Notification access required</string>
+    <string name="notification_status_enabled">Notification access enabled</string>
+    <string name="notification_status_disabled">Notification access required</string>
+    <string name="notification_access_active">Notification Access Active</string>
+    <string name="firebase_client_missing">Google sign-in is not configured for this Android app.</string>
 </resources>

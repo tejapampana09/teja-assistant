@@ -1,0 +1,8 @@
+{
+	"appId": "com.tejaassistant",
+	"appName": "Teja Assistant",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	}
+}
